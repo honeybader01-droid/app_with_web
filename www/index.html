@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Daily Tracker</title>
+<style>
+@font-face{font-family:'Bricolage Grotesque';font-weight:400;font-style:normal;font-display:swap;src:url(fonts/bg-400.woff2) format('woff2')}
+@font-face{font-family:'Bricolage Grotesque';font-weight:600;font-style:normal;font-display:swap;src:url(fonts/bg-600.woff2) format('woff2')}
+@font-face{font-family:'Bricolage Grotesque';font-weight:800;font-style:normal;font-display:swap;src:url(fonts/bg-800.woff2) format('woff2')}
+</style>
+<style>
+:root{--bg:#eef2ef;--card:#fff;--ink:#14272b;--mute:#5d7075;--line:#d5dfdb;--study:#1f6f78;--sleep:#5b5bd6;--money:#d98a1c;--bad:#b3402f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11191b;--card:#1a2528;--ink:#e6efed;--mute:#93a8ac;--line:#2c3b3f;--study:#4fb6c2;--sleep:#8f8ff0;--money:#f0b04a;--bad:#ef7d6b}}
+:root[data-theme="dark"]{--bg:#11191b;--card:#1a2528;--ink:#e6efed;--mute:#93a8ac;--line:#2c3b3f;--study:#4fb6c2;--sleep:#8f8ff0;--money:#f0b04a;--bad:#ef7d6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Bricolage Grotesque',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.45}
+main{max-width:720px;margin:0 auto;padding:18px 16px 60px}
+h1{font-size:1.7rem;font-weight:800;margin:6px 0 2px}
+.sub{color:var(--mute);margin:0 0 16px}
+nav{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:5px;margin-bottom:16px;overflow-x:auto;position:relative;scrollbar-width:none}
+nav button{flex:1 0 auto;border:0;background:none;color:var(--mute);font:600 .9rem inherit;font-family:inherit;padding:10px 14px;border-radius:10px;cursor:pointer}
+nav button.on{background:var(--ink);color:var(--bg)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sleep);outline-offset:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+h2{font-size:1.1rem;margin:0 0 10px;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat b{display:block;font-size:1.6rem;font-weight:800;line-height:1.1}
+.stat span{color:var(--mute);font-size:.85rem}
+.big{font-size:2.6rem!important}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:10px}
+label{display:block;font-size:.82rem;color:var(--mute);margin-bottom:3px}
+input,select{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.go{width:100%;border:0;border-radius:12px;padding:12px;font:600 1rem inherit;font-family:inherit;color:#fff;cursor:pointer}
+.bars{display:flex;gap:8px;align-items:flex-end;height:130px;margin-top:6px}
+.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:.72rem;color:var(--mute)}
+.col i{display:block;width:100%;border-radius:6px 6px 2px 2px;min-height:3px}
+.col em{font-style:normal;margin-bottom:3px;font-size:.7rem}
+.col span{margin-top:4px}
+.prog{height:12px;background:var(--bg);border:1px solid var(--line);border-radius:99px;overflow:hidden;margin:8px 0 4px}
+.prog div{height:100%}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+.item small{color:var(--mute);display:block}
+.x{border:0;background:none;color:var(--mute);font-size:1.3rem;cursor:pointer;padding:4px 8px}
+.empty{color:var(--mute);padding:8px 0}
+.goal{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:.9rem}
+.goal input{width:90px}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:.75rem;border:1px solid var(--line);color:var(--mute);margin-left:6px}
+.chk{display:flex;align-items:center;gap:12px;font-size:1rem;color:var(--ink);padding:11px 0;border-top:1px solid var(--line);margin:0;cursor:pointer}
+.chk input{width:22px;height:22px;padding:0;accent-color:var(--study);flex:none}
+.gwk{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.gd{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 2px;font:inherit;cursor:pointer;text-align:center}
+.gd b{display:block;font-size:1.5rem;line-height:1.3}
+.gd small{color:inherit;opacity:.8}
+.gd.done{background:var(--study);color:#fff;border-color:var(--study)}
+.gd.miss{border-color:var(--bad);color:var(--bad)}
+.gd.today{outline:2px solid var(--sleep);outline-offset:1px}
+.gd:disabled{opacity:.4;cursor:default}
+.mini{display:flex;gap:8px;margin:8px 0}
+.mini input{flex:1;min-width:0}
+.mini button{border:0;border-radius:10px;padding:0 14px;font:600 .9rem inherit;font-family:inherit;background:var(--ink);color:var(--bg);cursor:pointer;white-space:nowrap}
+.sm{border:1px solid var(--line);background:none;color:var(--ink);border-radius:10px;padding:8px 12px;font:600 .85rem inherit;font-family:inherit;cursor:pointer}
+ol.how{margin:0;padding-left:20px}ol.how li{margin:6px 0}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .hd{text-align:center;font-size:.72rem;color:var(--mute);padding:4px 0}
+.cd{aspect-ratio:1;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;font:inherit;font-size:.9rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:2px}
+.cd.today{border-color:var(--sleep);font-weight:800}
+.cd.sel{background:var(--ink);color:var(--bg)}
+.dots{display:flex;gap:2px;height:6px}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--money)}
+textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:84px;resize:vertical}
+.sl{margin:10px 0 0}
+.sm2{font-size:.78rem;color:var(--mute)}
+.slr{display:grid;grid-template-columns:24px 1fr 84px;gap:8px;align-items:center}
+.slr input[type=checkbox]{width:22px;height:22px;padding:0;accent-color:var(--study)}
+.cd.sel .dots i{background:var(--bg)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:6px 10px;font:600 .78rem inherit;font-family:inherit;cursor:pointer}
+.chip i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.chip.off{opacity:.4}
+.ax{font-size:10px;fill:var(--mute)}
+.vl{font-size:9px;fill:var(--ink)}
+.xl{font-size:10px;fill:var(--mute)}
+.tgh{display:grid;grid-template-columns:44px repeat(var(--n),1fr);border:1px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0;background:var(--card)}
+.tgh button{border:0;background:none;color:var(--ink);font:inherit;font-size:.78rem;padding:6px 0;cursor:pointer;text-align:center}
+.tgh button b{display:block;font-size:1.1rem}
+.tgh button.today b{color:var(--sleep)}
+.tgh button.sel{background:var(--bg)}
+.tg{height:540px;overflow-y:auto;border:1px solid var(--line);border-radius:0 0 12px 12px;background:var(--bg)}
+.tgi{display:grid;grid-template-columns:44px repeat(var(--n),1fr);height:1152px;position:relative}
+.hrs{position:relative}
+.hrs span{position:absolute;right:6px;font-size:.66rem;color:var(--mute);transform:translateY(-50%);white-space:nowrap}
+.dc{position:relative;border-left:1px solid var(--line);background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 47px,var(--line) 47px,var(--line) 48px);cursor:pointer;min-width:0}
+.rb{position:absolute;left:0;right:0;pointer-events:none}
+.rb small{font-size:.65rem;color:var(--mute);padding:2px 4px;display:block}
+.rb.z{background:color-mix(in srgb,var(--line) 70%,transparent)}
+.rb.g{background:color-mix(in srgb,var(--study) 28%,transparent)}
+.rb.e{background:color-mix(in srgb,var(--sleep) 28%,transparent)}
+.eb{position:absolute;background:var(--sleep);color:#fff;border-radius:6px;padding:2px 5px;overflow:hidden;font-size:.74rem;line-height:1.2;z-index:2;border-left:3px solid rgba(0,0,0,.25)}
+.eb b{display:block;font-weight:600;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.eb small{opacity:.9;font-size:.68rem}
+.eb.dn{opacity:.5;text-decoration:line-through}
+.nowl{position:absolute;left:0;right:0;height:2px;background:var(--bad);z-index:3}
+</style>
+<style>
+#auth{position:fixed;inset:0;z-index:50;background:var(--bg);display:none;align-items:center;justify-content:center;padding:20px}
+#auth.on{display:flex}
+#auth .card{width:100%;max-width:380px;margin:0}
+#auth .btn2{width:100%;border:1px solid var(--line);background:none;color:var(--ink);border-radius:12px;padding:12px;font:600 1rem inherit;font-family:inherit;cursor:pointer;margin-top:8px}
+#authMsg{min-height:1.3em;font-size:.85rem;margin:10px 0 0;color:var(--bad)}
+#authMsg.ok{color:var(--study)}
+.lnk{background:none;border:0;color:var(--study);text-decoration:underline;font:inherit;cursor:pointer;padding:0 4px}
+</style>
+</head>
+<body>
+<main>
+<h1>My Daily Tracker</h1>
+<p class="sub" id="dateLine"></p>
+<p class="sub" id="syncLine" style="font-size:.8rem;margin-top:-10px"></p>
+<p class="sub" id="acctLine" style="font-size:.8rem;margin-top:-10px"></p>
+<nav id="nav"></nav>
+<div id="view"></div>
+</main>
+<div id="auth"><div class="card">
+<h1 style="margin-top:0">My Daily Tracker</h1>
+<p class="sub">Sign in to sync your data on all your devices.</p>
+<label for="aEmail">Email</label><input id="aEmail" type="email" autocomplete="email" style="margin-bottom:10px">
+<label for="aPass">Password (at least 6 characters)</label><input id="aPass" type="password" autocomplete="current-password">
+<button class="go" style="background:var(--study);margin-top:14px" onclick="doSignIn()">Sign in</button>
+<button class="btn2" onclick="doSignUp()">Create account</button>
+<p id="authMsg"></p>
+</div></div>
+<script src="vendor/supabase.js"></script>
+<script>
+const K='daily-tracker-v1';
+let S={study:[],sleep:[],money:[],food:[],care:{},brows:[],gym:{},eng:{},engNotes:[],hunger:[],todos:[],events:[],plan:{},shop:{},bills:[],goals:{study:4,sleep:6,save:0}};
+try{const r=localStorage.getItem(K);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+var SY=null;
+const saveLocal=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const persist=()=>{saveLocal();pushSync()};
+if(!S.sleepGoalV2){S.goals.sleep=6;S.sleepGoalV2=1;persist()}
+function normH(){S.hunger.forEach(h=>{h.steps=h.steps||[];h.date=h.date||'';h.why=h.why||'';h.saves=h.saves||[]})}
+normH();S._t=S._t||{};
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const TODAY=ymd(new Date());
+const last=n=>{const a=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);a.push(ymd(d))}return a};
+const wk=(()=>{const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return ymd(d)})();
+const MONTH=TODAY.slice(0,7);
+const sum=(a,f)=>a.filter(f).reduce((s,x)=>s+(x.min??x.amt??0),0);
+const fh=m=>Math.floor(m/60)+'h '+Math.round(m%60)+'m';
+const rs=n=>'Rs '+Math.round(n).toLocaleString('en-US');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const dayName=s=>new Date(s+'T00:00').toLocaleDateString('en-US',{weekday:'short'});
+const nice=s=>new Date(s+'T00:00').toLocaleDateString('en-US',{day:'numeric',month:'short'});
+document.getElementById('dateLine').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+let tab='home';
+const tabs=[['home','Home'],['todo','To-do'],['calendar','Calendar'],['study','Study'],['sleep','Sleep'],['money','Money'],['bills','Payments'],['food','Food'],['plan','Meal plan'],['care','Care'],['gym','Gym'],['english','English'],['hunger','Hunger'],['history','History'],['weeks','Weeks'],['months','Months']];
+function nav(){document.getElementById('nav').innerHTML=tabs.map(t=>`<button class="${t[0]===tab?'on':''}" onclick="go('${t[0]}')">${t[1]}</button>`).join('')}
+function go(t){tab=t;location.hash=t;render()}
+
+function bars(vals,labels,goal,color,fmt){
+  const mx=Math.max(goal||0,...vals,1);
+  return `<div class="bars">${vals.map((v,i)=>`<div class="col"><em>${v?fmt(v):''}</em><i style="height:${Math.max(v/mx*100*.78,v?3:2)}%;background:${v?color:'var(--line)'}"></i><span>${labels[i]}</span></div>`).join('')}</div>`}
+function prog(v,goal,color){const p=goal?Math.min(100,v/goal*100):0;return `<div class="prog"><div style="width:${p}%;background:${color}"></div></div>`}
+function list(arr,fn,key){
+  if(!arr.length)return '<p class="empty">Nothing logged yet. Add your first entry above.</p>';
+  return arr.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id).slice(0,15).map(e=>`<div class="item"><div>${fn(e)}</div><button class="x" aria-label="Delete entry" onclick="del('${key}',${e.id})">×</button></div>`).join('')}
+function del(k,id){S[k]=S[k].filter(e=>e.id!==id);persist();render()}
+const val=id=>document.getElementById(id).value;
+const CATS=['Food','Transport','Shopping','Education','Wasted','Bills','Health','Other'];
+const CC={Food:'#d9622b',Transport:'#2f8fbf',Shopping:'#b04fb0',Education:'#1f9a78',Wasted:'#c9372c',Bills:'#8a8f3a',Health:'#d0527a',Other:'#7b8a90'};
+const SP=()=>[...S.money.filter(e=>e.type==='spend'),...S.food.filter(e=>e.amt>0).map(e=>({date:e.date,cat:'Food',amt:e.amt}))];
+const cats=a=>{const t={};a.forEach(e=>{const c=e.cat||'Other';t[c]=(t[c]||0)+e.amt});return t};
+const catBars=t=>{const en=Object.entries(t).sort((a,b)=>b[1]-a[1]);if(!en.length)return '<p class="empty">No spending yet.</p>';const tot=en.reduce((s,x)=>s+x[1],0);return en.map(([c,v])=>`<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:.9rem"><span>${esc(c)}</span><b>${rs(v)} <small style="color:var(--mute);font-weight:400">${Math.round(v/tot*100)}%</small></b></div>${prog(v,tot,CC[c]||CC.Other)}</div>`).join('')};
+
+function addStudy(){
+  const m=(+val('sh')||0)*60+(+val('sm')||0);
+  if(m<=0)return alert('Enter the time you studied.');
+  S.study.push({id:Date.now(),date:val('sd'),subject:val('ss').trim()||'General study',min:m});persist();render()}
+function addSleep(){
+  const b=val('sb'),w=val('sw');if(!b||!w)return alert('Enter bedtime and wake-up time.');
+  const [bh,bm]=b.split(':').map(Number),[wh,wm]=w.split(':').map(Number);
+  let m=(wh*60+wm)-(bh*60+bm);if(m<=0)m+=1440;
+  S.sleep.push({id:Date.now(),date:val('sdt'),bed:b,wake:w,min:m});persist();render()}
+function addMoney(){
+  const a=+val('ma');if(!(a>0))return alert('Enter an amount.');
+  S.money.push({id:Date.now(),date:val('md'),type:val('mt'),cat:val('mc'),amt:a});persist();render()}
+function setGoal(k,v){S.goals[k]=Math.max(0,+v||0);persist();render()}
+
+function addFood(){
+  const n=val('fn').trim();if(!n)return alert('Enter the food name.');
+  const p=val('fp').trim();
+  S.food.push({id:Date.now(),date:val('fd'),name:n,meal:val('fm'),amt:p?Math.max(0,+p||0):0,free:!p});persist();render()}
+
+function foodView(){
+  const d=last(7),v=d.map(x=>sum(S.food,e=>e.date===x));
+  const T=S.food.filter(e=>e.date===TODAY),W=S.food.filter(e=>e.date>=wk),M=S.food.filter(e=>e.date.startsWith(MONTH));
+  const k=m=>m>=1000?(m/1000).toFixed(1)+'k':Math.round(m);
+  return `<div class="card"><h2>Add food</h2>
+  <div class="row"><div><label for="fn">Food</label><input id="fn" placeholder="e.g. Rice and curry"></div><div><label for="fp">Price (Rs) – optional</label><input id="fp" type="number" min="0" placeholder="Leave empty if no price"></div></div>
+  <div class="row"><div><label for="fm">Meal</label><select id="fm"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Drink</option></select></div><div><label for="fd">Date</label><input id="fd" type="date" value="${TODAY}"></div></div>
+  <button class="go" style="background:var(--bad)" onclick="addFood()">Add food</button></div>
+  <div class="card"><h2>Totals</h2><div class="stats">
+  <div class="stat"><b>${T.length}</b><span>items today (${rs(sum(T,()=>1))})</span></div>
+  <div class="stat"><b>${W.length}</b><span>items this week (${rs(sum(W,()=>1))})</span></div>
+  <div class="stat"><b>${M.length}</b><span>items this month (${rs(sum(M,()=>1))})</span></div>
+  <div class="stat"><b>${M.filter(e=>e.free).length}</b><span>with no price this month</span></div></div></div>
+  <div class="card"><h2>Food spending, last 7 days</h2>${bars(v,d.map(dayName),0,'var(--bad)',k)}</div>
+  <div class="card"><h2>Recent food</h2>${list(S.food,e=>`<b>${esc(e.name)}</b> · ${e.free?'<span class="tag">no price</span>':rs(e.amt)}<small>${e.meal} · ${nice(e.date)}</small>`,'food')}</div>`}
+
+function homeView(){return homeBase()+backupCard()}
+function homeBase(){
+  const st=sum(S.study,e=>e.date===TODAY),stw=sum(S.study,e=>e.date>=wk);
+  const sl=S.sleep.filter(e=>e.date===TODAY)[0],
+        sp=sum(SP(),e=>e.date>=wk),spm=sum(SP(),e=>e.date.startsWith(MONTH)),
+        sv=sum(S.money,e=>e.type==='save'&&e.date.startsWith(MONTH));
+  return `${billsAlert()}<div class="card"><h2>Today</h2><div class="stats">
+  <div class="stat"><b class="big" style="color:var(--study)">${fh(st)}</b><span>studied of ${S.goals.study}h goal</span></div>
+  <div class="stat"><b class="big" style="color:var(--sleep)">${sl?fh(sl.min):'–'}</b><span>slept last night</span></div></div>${prog(st,S.goals.study*60,'var(--study)')}</div>
+  <div class="card"><h2>This week</h2><div class="stats">
+  <div class="stat"><b>${fh(stw)}</b><span>study time</span></div>
+  <div class="stat"><b>${rs(sp)}</b><span>spent</span></div></div></div>
+  <div class="card"><h2>This month</h2><div class="stats">
+  <div class="stat"><b>${rs(spm)}</b><span>spent</span></div>
+  <div class="stat"><b style="color:var(--money)">${rs(sv)}</b><span>saved</span></div></div></div>
+  <div class="card"><h2>Food today</h2><div class="stats"><div class="stat"><b>${S.food.filter(e=>e.date===TODAY).length}</b><span>items</span></div><div class="stat"><b>${rs(sum(S.food,e=>e.date===TODAY))}</b><span>spent on food</span></div></div></div>
+  <div class="card"><h2>Routine today</h2><div class="stats"><div class="stat"><b style="color:var(--study)">${todayCare()}</b><span>skincare steps done</span></div><div class="stat"><b>${gymToday()}</b><span>gym, 5:30 to 6:45 AM</span></div>
+  <div class="stat"><b>${engToday()}</b><span>English, 10 to 11 PM</span></div></div></div>
+  <div class="card"><h2>Today’s schedule</h2>${homeSched()}</div>
+  <div class="card"><h2>Today’s meals</h2>${homeMeals()}</div>
+  <div class="card"><h2>To-do</h2><div class="stats"><div class="stat"><b style="color:var(--study)">${todoCt('day',TODAY)}</b><span>today’s tasks done</span></div><div class="stat"><b>${todoCt('week',wk)}</b><span>this week’s tasks done</span></div></div></div>
+  <div class="card"><h2>My hunger list</h2><div class="stats"><div class="stat"><b>${S.hunger.filter(h=>h.done).length}/${S.hunger.length}</b><span>achieved</span></div><div class="stat"><b style="color:var(--money)">${rs(S.hunger.reduce((s,h)=>s+h.saves.reduce((a,x)=>a+x.amt,0),0))}</b><span>saved for my list</span></div></div></div>`}
+
+function studyView(){
+  const d=last(7),v=d.map(x=>sum(S.study,e=>e.date===x));
+  const subj={};S.study.filter(e=>e.date>=wk).forEach(e=>subj[e.subject]=(subj[e.subject]||0)+e.min);
+  const sb=Object.entries(subj).sort((a,b)=>b[1]-a[1]).map(([k,m])=>`<div class="item"><span>${esc(k)}</span><b>${fh(m)}</b></div>`).join('');
+  return `<div class="card"><h2>Log study time</h2>
+  <div class="row"><div><label for="ss">Subject</label><input id="ss" placeholder="e.g. Maths"></div><div><label for="sd">Date</label><input id="sd" type="date" value="${TODAY}"></div></div>
+  <div class="row"><div><label for="sh">Hours</label><input id="sh" type="number" min="0" max="24" placeholder="0"></div><div><label for="sm">Minutes</label><input id="sm" type="number" min="0" max="59" placeholder="0"></div></div>
+  <button class="go" style="background:var(--study)" onclick="addStudy()">Add study time</button></div>
+  <div class="card"><h2>Last 7 days</h2>${bars(v,d.map(dayName),S.goals.study*60,'var(--study)',m=>(m/60).toFixed(1)+'h')}
+  <div class="goal" style="margin-top:12px">Daily goal <input type="number" min="0" step="0.5" value="${S.goals.study}" onchange="setGoal('study',this.value)" aria-label="Daily study goal in hours"> hours</div></div>
+  ${sb?`<div class="card"><h2>This week by subject</h2>${sb}</div>`:''}
+  <div class="card"><h2>Recent entries</h2>${list(S.study,e=>`<b>${esc(e.subject)}</b> · ${fh(e.min)}<small>${nice(e.date)}</small>`,'study')}</div>`}
+
+function sleepView(){
+  const d=last(7),v=d.map(x=>sum(S.sleep,e=>e.date===x)),n=v.filter(x=>x).length,avg=n?v.reduce((a,b)=>a+b,0)/n:0;
+  return `<div class="card"><h2>Log sleep</h2><p class="sub" style="margin-bottom:12px">Target: in bed by 11:00 PM, up at 5:00 AM (6 hours).</p>
+  <div class="row"><div><label for="sb">Went to bed</label><input id="sb" type="time" value="23:00"></div><div><label for="sw">Woke up</label><input id="sw" type="time" value="05:00"></div><div><label for="sdt">Wake-up date</label><input id="sdt" type="date" value="${TODAY}"></div></div>
+  <button class="go" style="background:var(--sleep)" onclick="addSleep()">Add sleep</button></div>
+  <div class="card"><h2>Last 7 nights</h2><div class="stat"><b>${n?fh(avg):'–'}</b><span>average per night (goal ${S.goals.sleep}h)</span></div>
+  ${bars(v,d.map(dayName),S.goals.sleep*60,'var(--sleep)',m=>(m/60).toFixed(1)+'h')}
+  <div class="goal" style="margin-top:12px">Sleep goal <input type="number" min="0" step="0.5" value="${S.goals.sleep}" onchange="setGoal('sleep',this.value)" aria-label="Sleep goal in hours"> hours</div></div>
+  <div class="card"><h2>Recent sleep</h2>${list(S.sleep,e=>`<b>${fh(e.min)}</b>${e.min>=S.goals.sleep*60?'<span class="tag">goal met</span>':''}<small>${nice(e.date)} · ${e.bed} to ${e.wake}</small>`,'sleep')}</div>`}
+
+function moneyView(){
+  const d=last(7),sp=d.map(x=>sum(SP(),e=>e.date===x));
+  const wS=sum(SP(),e=>e.date>=wk),mS=sum(SP(),e=>e.date.startsWith(MONTH)),
+  mV=sum(S.money,e=>e.type==='save'&&e.date.startsWith(MONTH)),mI=sum(S.money,e=>e.type==='income'&&e.date.startsWith(MONTH)),
+  wV=sum(S.money,e=>e.type==='save'&&e.date>=wk),tV=sum(S.money,e=>e.type==='save');
+  const G=S.goals.save;
+  const lab={spend:'Spent',save:'Saved',income:'Income'},col={spend:'var(--bad)',save:'var(--money)',income:'var(--study)'};
+  return `<div class="card"><h2>Add money entry</h2>
+  <div class="row"><div><label for="mt">Type</label><select id="mt"><option value="spend">Spent</option><option value="save">Saved</option><option value="income">Income</option></select></div><div><label for="ma">Amount (Rs)</label><input id="ma" type="number" min="0" placeholder="0"></div></div>
+  <div class="row"><div><label for="mc">Category (for spending)</label><select id="mc">${CATS.map(c=>`<option>${c}</option>`).join('')}</select></div><div><label for="md">Date</label><input id="md" type="date" value="${TODAY}"></div></div>
+  <button class="go" style="background:var(--money);color:#1b1200" onclick="addMoney()">Add entry</button></div>
+  <div class="card"><h2>Week and month</h2><div class="stats">
+  <div class="stat"><b>${rs(wS)}</b><span>spent this week</span></div><div class="stat"><b>${rs(wV)}</b><span>saved this week</span></div>
+  <div class="stat"><b>${rs(mS)}</b><span>spent this month</span></div><div class="stat"><b>${rs(mV)}</b><span>saved this month</span></div>
+  <div class="stat"><b>${rs(mI)}</b><span>income this month</span></div><div class="stat"><b>${rs(tV)}</b><span>total saved</span></div></div></div>
+  <div class="card"><h2>Monthly savings goal</h2><div class="goal">Goal Rs <input type="number" min="0" step="500" value="${G}" onchange="setGoal('save',this.value)" aria-label="Monthly savings goal"></div>
+  ${G?prog(mV,G,'var(--money)')+`<span class="sub">${rs(mV)} of ${rs(G)} (${Math.min(100,Math.round(mV/G*100))}%)</span>`:'<p class="empty">Set a goal to see your progress.</p>'}</div>
+  <div class="card"><h2>Spending by category, this week</h2>${catBars(cats(SP().filter(e=>e.date>=wk)))}</div>
+  <div class="card"><h2>Spending by category, this month</h2>${catBars(cats(SP().filter(e=>e.date.startsWith(MONTH))))}<p class="empty">Food prices from the Food tab are included automatically.</p></div>
+  <div class="card"><h2>Spending, last 7 days</h2>${bars(sp,d.map(dayName),0,'var(--bad)',m=>m>=1000?(m/1000).toFixed(1)+'k':Math.round(m))}</div>
+  <div class="card"><h2>Recent entries</h2>${list(S.money,e=>`<b style="color:${col[e.type]}">${rs(e.amt)}</b> · ${lab[e.type]}<small>${esc(e.cat)} · ${nice(e.date)}</small>`,'money')}</div>`}
+
+const AM=[['am_wash','Face wash'],['am_cream','Face cream'],['am_sun','Sunscreen'],['am_body','Body lotion']];
+const PM=[['pm_wash','Face wash'],['pm_cream','Face cream'],['pm_body','Body lotion']];
+const SAT=[['sat_hair','Ezthara hair miracle'],['sat_shave','Body shaving']];
+const ALL=[...AM,...PM].map(x=>x[0]);
+const careDone=(d,id)=>(S.care[d]||[]).includes(id);
+const addDays=(s,n)=>{const d=new Date(s+'T00:00');d.setDate(d.getDate()+n);return ymd(d)};
+let careDate=TODAY;
+function setCareDate(v){careDate=v||TODAY;render()}
+function tCare(id){const a=S.care[careDate]||(S.care[careDate]=[]);const i=a.indexOf(id);if(i<0)a.push(id);else a.splice(i,1);persist();render()}
+function saveBrows(){const d=val('bd')||TODAY;if(S.brows.some(e=>e.date===d))return alert('Already saved for that date.');S.brows.push({id:Date.now(),date:d});persist();render()}
+function cycleGym(d){const c=S.gym[d];if(!c)S.gym[d]='done';else if(c==='done')S.gym[d]='miss';else delete S.gym[d];persist();render()}
+function todayCare(){const dow=new Date().getDay(),ids=[...ALL,...(dow===6?SAT.map(x=>x[0]):[])];return ids.filter(id=>careDone(TODAY,id)).length+'/'+ids.length}
+function gymToday(){const g=new Date().getDay();if(g===0||g===6)return 'Rest day';const s=S.gym[TODAY];return s==='done'?'Done \u2713':s==='miss'?'Missed':'Not yet'}
+
+function careView(){
+  const d=careDate,dt=new Date(d+'T00:00'),sat=dt.getDay()===6;
+  const chk=(id,l)=>`<label class="chk"><input type="checkbox" ${careDone(d,id)?'checked':''} onchange="tCare('${id}')"> ${l}</label>`;
+  const days=last(7),v=days.map(x=>ALL.filter(id=>careDone(x,id)).length);
+  const full=Object.keys(S.care).filter(k=>k.startsWith(MONTH)&&ALL.every(id=>careDone(k,id))).length;
+  const nextSat=addDays(d,(6-dt.getDay()+7)%7);
+  const brs=S.brows.slice().sort((a,b)=>b.date.localeCompare(a.date)),lastB=brs[0]&&brs[0].date;
+  let due='';
+  if(lastB){const n=new Date(lastB+'T00:00');n.setMonth(n.getMonth()+1);const left=Math.round((n-new Date(TODAY+'T00:00'))/864e5);due='Next due around '+nice(ymd(n))+' ('+(left>=0?'in '+left+' days':Math.abs(left)+' days overdue')+')'}
+  const bDone=S.brows.some(e=>e.date.startsWith(MONTH));
+  return `<div class="card"><h2>Skincare and bodycare</h2><div class="row"><div><label for="cd">Date</label><input id="cd" type="date" value="${d}" max="${TODAY}" onchange="setCareDate(this.value)"></div></div>
+  <h2 style="margin-top:6px">Morning</h2>${AM.map(x=>chk(x[0],x[1])).join('')}
+  <h2 style="margin-top:16px">Night</h2>${PM.map(x=>chk(x[0],x[1])).join('')}</div>
+  <div class="card"><h2>Saturday care${sat?'<span class="tag">this date</span>':''}</h2>${sat?SAT.map(x=>chk(x[0],x[1])).join(''):`<p class="empty">Every Saturday: Ezthara hair miracle and body shaving. Next Saturday is ${nice(nextSat)}. Pick a Saturday in the date box above to tick them.</p>`}</div>
+  <div class="card"><h2>Eyebrows (monthly)</h2><div class="stat"><b style="color:${bDone?'var(--study)':'var(--bad)'}">${bDone?'Done':'Not yet'}</b><span>this month${lastB?' \u00b7 last on '+nice(lastB):''}</span></div>${due?`<p class="sub">${due}</p>`:''}
+  <div class="row"><div><label for="bd">Date done</label><input id="bd" type="date" value="${TODAY}"></div></div><button class="go" style="background:var(--sleep)" onclick="saveBrows()">Save eyebrows done</button>
+  ${list(S.brows,e=>`<b>Eyebrows done</b><small>${nice(e.date)}</small>`,'brows')}</div>
+  <div class="card"><h2>Skincare, last 7 days</h2><div class="stat"><b>${full}</b><span>full days this month (all ${ALL.length} steps)</span></div>${bars(v,days.map(dayName),ALL.length,'var(--study)',m=>m+'/'+ALL.length)}</div>`}
+
+function gymView(){
+  const wd=[0,1,2,3,4].map(i=>addDays(wk,i)),names=['Mon','Tue','Wed','Thu','Fri'];
+  const cnt=a=>a.filter(x=>S.gym[x]==='done').length;
+  const wDone=cnt(wd),mk=Object.keys(S.gym).filter(k=>k.startsWith(MONTH)),mDone=mk.filter(k=>S.gym[k]==='done').length,mMiss=mk.filter(k=>S.gym[k]==='miss').length;
+  let streak=0;
+  for(let i=0;i<120;i++){const x=addDays(TODAY,-i),g=new Date(x+'T00:00').getDay();if(g===0||g===6)continue;if(x===TODAY&&!S.gym[x])continue;if(S.gym[x]==='done')streak++;else break}
+  const wks=[5,4,3,2,1,0].map(i=>addDays(wk,-7*i)),bv=wks.map(w=>cnt([0,1,2,3,4].map(i=>addDays(w,i))));
+  return `<div class="card"><h2>Morning gym \u00b7 5:30 to 6:45 AM</h2><p class="sub" style="margin-bottom:12px">Every weekday, 75 minutes. Tap a day to mark it done, missed, or clear it.</p>
+  <div class="gwk">${wd.map((x,i)=>{const s=S.gym[x]||'';return `<button class="gd ${s} ${x===TODAY?'today':''}" ${x>TODAY?'disabled':''} onclick="cycleGym('${x}')" aria-label="${names[i]} ${s||'not marked'}"><small>${names[i]}</small><b>${s==='done'?'\u2713':s==='miss'?'\u2715':'\u00b7'}</b><small>${x.slice(8)}</small></button>`}).join('')}</div></div>
+  <div class="card"><h2>Progress</h2><div class="stats">
+  <div class="stat"><b>${wDone}/5</b><span>sessions this week (${fh(wDone*75)})</span></div>
+  <div class="stat"><b>${mDone}</b><span>sessions this month (${fh(mDone*75)})</span></div>
+  <div class="stat"><b>${mMiss}</b><span>missed this month</span></div>
+  <div class="stat"><b>${streak}</b><span>weekday streak</span></div></div></div>
+  <div class="card"><h2>Sessions per week, last 6 weeks</h2>${bars(bv,wks.map(nice),5,'var(--study)',m=>m+'/5')}</div>`}
+
+function cycleEng(d){const c=S.eng[d];if(!c)S.eng[d]='done';else if(c==='done')S.eng[d]='miss';else delete S.eng[d];persist();render()}
+function addEngNote(){const n=val('en').trim();if(!n)return alert('Write what you practiced.');S.engNotes.push({id:Date.now(),date:val('ed'),note:n});persist();render()}
+function engToday(){const g=new Date().getDay();if(g===0||g===6)return 'Rest day';const s=S.eng[TODAY];return s==='done'?'Done \u2713':s==='miss'?'Missed':'Not yet'}
+
+function engView(){
+  const wd=[0,1,2,3,4].map(i=>addDays(wk,i)),names=['Mon','Tue','Wed','Thu','Fri'];
+  const cnt=a=>a.filter(x=>S.eng[x]==='done').length;
+  const wDone=cnt(wd),mk=Object.keys(S.eng).filter(k=>k.startsWith(MONTH)),mDone=mk.filter(k=>S.eng[k]==='done').length,mMiss=mk.filter(k=>S.eng[k]==='miss').length;
+  let streak=0;
+  for(let i=0;i<120;i++){const x=addDays(TODAY,-i),g=new Date(x+'T00:00').getDay();if(g===0||g===6)continue;if(x===TODAY&&!S.eng[x])continue;if(S.eng[x]==='done')streak++;else break}
+  const wks=[5,4,3,2,1,0].map(i=>addDays(wk,-7*i)),bv=wks.map(w=>cnt([0,1,2,3,4].map(i=>addDays(w,i))));
+  return `<div class="card"><h2>Spoken English \u00b7 10 to 11 PM</h2><p class="sub" style="margin-bottom:12px">Every weekday, 1 hour. Tap a day to mark it done, missed, or clear it.</p>
+  <div class="gwk">${wd.map((x,i)=>{const s=S.eng[x]||'';return `<button class="gd ${s} ${x===TODAY?'today':''}" ${x>TODAY?'disabled':''} onclick="cycleEng('${x}')" aria-label="${names[i]} ${s||'not marked'}"><small>${names[i]}</small><b>${s==='done'?'\u2713':s==='miss'?'\u2715':'\u00b7'}</b><small>${x.slice(8)}</small></button>`}).join('')}</div></div>
+  <div class="card"><h2>Progress</h2><div class="stats">
+  <div class="stat"><b>${wDone}/5</b><span>sessions this week (${fh(wDone*60)})</span></div>
+  <div class="stat"><b>${mDone}</b><span>sessions this month (${fh(mDone*60)})</span></div>
+  <div class="stat"><b>${mMiss}</b><span>missed this month</span></div>
+  <div class="stat"><b>${streak}</b><span>weekday streak</span></div></div></div>
+  <div class="card"><h2>Sessions per week, last 6 weeks</h2>${bars(bv,wks.map(nice),5,'var(--sleep)',m=>m+'/5')}</div>
+  <div class="card"><h2>What did you practice?</h2>
+  <div class="row"><div><label for="en">Topic or new words</label><input id="en" placeholder="e.g. Ordering food, 10 new words"></div><div><label for="ed">Date</label><input id="ed" type="date" value="${TODAY}"></div></div>
+  <button class="go" style="background:var(--sleep)" onclick="addEngNote()">Save note</button>
+  ${list(S.engNotes,e=>`${esc(e.note)}<small>${nice(e.date)}</small>`,'engNotes')}</div>`}
+
+const HTYPES=['Achievement','Experience','Travel','Skill','Purchase','Other'];
+const hf=id=>S.hunger.find(h=>h.id===id);
+const hSaved=h=>h.saves.reduce((s,x)=>s+x.amt,0);
+const hDays=h=>h.date?Math.round((new Date(h.date+'T00:00')-new Date(TODAY+'T00:00'))/864e5):null;
+const hWeekly=h=>{const need=Math.max(0,h.target-hSaved(h)),d=hDays(h);return(!h.done&&need>0&&d>0)?need/Math.max(1,Math.ceil(d/7)):0};
+let armed=null;
+function addHunger(){
+  const t=val('ht').trim();if(!t)return alert('Write what you want to achieve or experience.');
+  S.hunger.push({id:Date.now(),title:t,kind:val('hk'),target:Math.max(0,+val('hg')||0),date:val('hd'),why:val('hw').trim(),steps:[],saves:[],done:false,doneDate:''});persist();render()}
+function hSave(id){
+  const a=+val('hs'+id);if(!(a>0))return alert('Enter an amount to save.');
+  const sid=Date.now();hf(id).saves.push({id:sid,date:TODAY,amt:a});
+  if(document.getElementById('sc'+id).checked)S.money.push({id:sid,date:TODAY,type:'save',cat:'Hunger list',amt:a});
+  persist();render()}
+function hDelSave(hid,sid){const h=hf(hid);h.saves=h.saves.filter(x=>x.id!==sid);S.money=S.money.filter(e=>e.id!==sid);persist();render()}
+function hAddStep(id){const t=val('st'+id).trim();if(!t)return;hf(id).steps.push({id:Date.now(),t:t,done:false});persist();render()}
+function hTStep(hid,sid){const s=hf(hid).steps.find(x=>x.id===sid);s.done=!s.done;persist();render()}
+function hDelStep(hid,sid){const h=hf(hid);h.steps=h.steps.filter(x=>x.id!==sid);persist();render()}
+function hDone(id){const h=hf(id);h.done=!h.done;h.doneDate=h.done?TODAY:'';persist();render()}
+function hDel(id){if(armed!==id){armed=id;render();return}S.hunger=S.hunger.filter(h=>h.id!==id);armed=null;persist();render()}
+
+function hCard(h){
+  const saved=hSaved(h),need=Math.max(0,h.target-saved),d=hDays(h);
+  let plan;
+  if(h.done)plan='Fulfilled'+(h.doneDate?' on '+nice(h.doneDate):'')+'. Well done!';
+  else if(!h.target)plan='Add a price to get a saving plan. If it costs nothing, just work through the steps below.';
+  else if(need===0)plan='Fully saved. Time to make it happen!';
+  else if(h.date){
+    if(d<=0)plan=rs(need)+' still needed and the date has passed. Add a new goal date by recreating it, or keep saving.';
+    else plan='To reach it by '+nice(h.date)+' ('+d+' days left), save about <b>'+rs(need/Math.max(1,Math.ceil(d/30.4)))+' per month</b> or <b>'+rs(hWeekly(h))+' per week</b>.'}
+  else plan='No date set. Saving '+rs(need/6)+' a month takes 6 months, or '+rs(need/12)+' a month takes 12 months.';
+  const sd=h.steps.filter(s=>s.done).length;
+  const steps=h.steps.map(s=>`<label class="chk"><input type="checkbox" ${s.done?'checked':''} onchange="hTStep(${h.id},${s.id})"><span style="flex:1;${s.done?'text-decoration:line-through;color:var(--mute)':''}">${esc(s.t)}</span><button type="button" class="x" aria-label="Delete step" onclick="event.preventDefault();hDelStep(${h.id},${s.id})">×</button></label>`).join('');
+  const hist=h.saves.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id).slice(0,5).map(x=>`<div class="item"><div><b>${rs(x.amt)}</b><small>${nice(x.date)}</small></div><button class="x" aria-label="Delete savings entry" onclick="hDelSave(${h.id},${x.id})">×</button></div>`).join('');
+  return `<div class="card"><h2>${esc(h.title)}<span class="tag">${esc(h.kind||'Goal')}</span>${h.date?'<span class="tag">by '+nice(h.date)+'</span>':''}</h2>
+  ${h.why?`<p class="sub" style="margin:0 0 8px">${esc(h.why)}</p>`:''}
+  ${h.target?prog(saved,h.target,h.done?'var(--study)':'var(--money)')+`<div class="goal" style="justify-content:space-between"><span>${rs(saved)} saved of ${rs(h.target)}</span><b>${Math.min(100,Math.round(saved/h.target*100))}%</b></div>`:(saved?`<p class="sub">${rs(saved)} saved</p>`:'')}
+  <p style="margin:8px 0">${plan}</p>
+  ${h.done?'':`<div class="mini"><input id="hs${h.id}" type="number" min="0" placeholder="Amount (Rs)" aria-label="Savings amount"><button onclick="hSave(${h.id})">Add savings</button></div><label class="chk" style="border:0;padding:4px 0 10px;font-size:.85rem;color:var(--mute)"><input id="sc${h.id}" type="checkbox" checked style="width:18px;height:18px"> Also count it in my Money tab savings</label>`}
+  <h2 style="margin-top:8px">Steps${h.steps.length?' ('+sd+'/'+h.steps.length+')':''}</h2>${steps||'<p class="empty">No steps yet. Break it into small actions.</p>'}
+  ${h.done?'':`<div class="mini"><input id="st${h.id}" placeholder="Add a small step" aria-label="New step"><button onclick="hAddStep(${h.id})">Add step</button></div>`}
+  ${hist?'<h2 style="margin-top:10px">Recent savings</h2>'+hist:''}
+  <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="sm" onclick="hDone(${h.id})">${h.done?'Reopen':'Mark as fulfilled ✓'}</button><button class="sm" style="color:var(--bad)" onclick="hDel(${h.id})">${armed===h.id?'Tap again to delete':'Delete'}</button></div></div>`}
+
+function hungerView(){
+  const act=S.hunger.filter(h=>!h.done).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')),dn=S.hunger.filter(h=>h.done);
+  const sav=act.reduce((s,h)=>s+hSaved(h),0),left=act.reduce((s,h)=>s+Math.max(0,h.target-hSaved(h)),0),wkly=act.reduce((s,h)=>s+hWeekly(h),0);
+  const focus=act.find(h=>h.date&&h.target&&hWeekly(h)>0)||act[0];
+  const ns=focus&&focus.steps.find(s=>!s.done);
+  return `<div class="card"><h2>Add to my hunger list</h2>
+  <div class="row"><div style="grid-column:1/-1"><label for="ht">What do you want?</label><input id="ht" placeholder="e.g. Visit Japan, run a 10K, buy a laptop"></div></div>
+  <div class="row"><div><label for="hk">Type</label><select id="hk">${HTYPES.map(t=>`<option>${t}</option>`).join('')}</select></div><div><label for="hg">Cost (Rs) – optional</label><input id="hg" type="number" min="0" placeholder="0"></div><div><label for="hd">Target date – optional</label><input id="hd" type="date" min="${TODAY}"></div></div>
+  <div class="row"><div style="grid-column:1/-1"><label for="hw">Why it matters to me – optional</label><input id="hw" placeholder="Your reason keeps you going"></div></div>
+  <button class="go" style="background:var(--money);color:#1b1200" onclick="addHunger()">Add to list</button></div>
+  ${S.hunger.length?`<div class="card"><h2>Overview</h2><div class="stats"><div class="stat"><b>${act.length}</b><span>to fulfil</span></div><div class="stat"><b>${dn.length}</b><span>fulfilled</span></div><div class="stat"><b style="color:var(--money)">${rs(sav)}</b><span>saved so far</span></div><div class="stat"><b>${rs(left)}</b><span>still needed</span></div></div>${wkly?`<p style="margin:12px 0 0">To hit your dates, put aside about <b>${rs(wkly)} per week</b> across all goals.</p>`:''}</div>`:''}
+  ${focus?`<div class="card"><h2>This week’s focus</h2><p style="margin:0"><b>${esc(focus.title)}</b>${hWeekly(focus)?' · save about '+rs(hWeekly(focus))+' this week':''}</p><p class="sub" style="margin:6px 0 0">${ns?'Next step: '+esc(ns.t):'Add a small next step below so you always know what to do.'}</p></div>`:''}
+  <div class="card"><h2>My method: little by little</h2><ol class="how"><li><b>Write it down</b> with the reason it matters.</li><li><b>Add a cost and a date</b> to see exactly how much to save per week.</li><li><b>Break it into small steps</b> (research, book, practice) and tick them off.</li><li><b>Save a little every week</b> and tap Add savings, even a small amount.</li><li><b>Focus on one or two goals</b> at a time. The list shows the nearest date first.</li><li><b>Review every Sunday</b>, then mark it fulfilled and celebrate.</li></ol></div>
+  ${act.map(hCard).join('')||(S.hunger.length?'':'<p class="empty">Your list is empty. Add your first goal above.</p>')}
+  ${dn.length?'<h2 style="margin:18px 0 10px">Fulfilled ✓</h2>'+dn.map(hCard).join(''):''}`}
+
+const todoCt=(sc,d)=>{const a=S.todos.filter(t=>t.scope===sc&&t.date===d);return a.filter(t=>t.done).length+'/'+a.length};
+let todoDay=TODAY,todoWk=wk;
+function setTodoDay(v){todoDay=v||TODAY;render()}
+function shiftWk(n){todoWk=addDays(todoWk,7*n);render()}
+function addTodo(scope){const t=val(scope==='day'?'td':'tw').trim();if(!t)return;S.todos.push({id:Date.now(),text:t,scope:scope,date:scope==='day'?todoDay:todoWk,done:false,doneDate:''});persist();render()}
+function tTodo(id){const t=S.todos.find(x=>x.id===id);t.done=!t.done;t.doneDate=t.done?TODAY:'';persist();render()}
+function delTodo(id){S.todos=S.todos.filter(x=>x.id!==id);persist();render()}
+function moveTodo(id){const t=S.todos.find(x=>x.id===id);t.date=t.scope==='day'?TODAY:wk;persist();render()}
+
+function todoView(){
+  const row=(t,mv)=>`<label class="chk"><input type="checkbox" ${t.done?'checked':''} onchange="tTodo(${t.id})"><span style="flex:1;${t.done?'text-decoration:line-through;color:var(--mute)':''}">${esc(t.text)}${mv?`<small style="display:block;color:var(--mute)">from ${nice(t.date)}</small>`:''}</span>${mv?`<button type="button" class="sm" onclick="event.preventDefault();moveTodo(${t.id})">Move to ${t.scope==='day'?'today':'this week'}</button>`:''}<button type="button" class="x" aria-label="Delete task" onclick="event.preventDefault();delTodo(${t.id})">×</button></label>`;
+  const rows=(a,mv)=>a.length?a.slice().sort((x,y)=>x.done-y.done||x.id-y.id).map(t=>row(t,mv)).join(''):'<p class="empty">Nothing here yet. Add your first task above.</p>';
+  const pr=a=>{const d=a.filter(t=>t.done).length;return a.length?`<div class="goal" style="justify-content:space-between;margin-top:10px"><span>${d} of ${a.length} done</span><b>${Math.round(d/a.length*100)}%</b></div>`+prog(d,a.length,'var(--study)'):''};
+  const D=S.todos.filter(t=>t.scope==='day'&&t.date===todoDay),W=S.todos.filter(t=>t.scope==='week'&&t.date===todoWk);
+  const overD=todoDay===TODAY?S.todos.filter(t=>t.scope==='day'&&t.date<TODAY&&!t.done):[];
+  const overW=todoWk===wk?S.todos.filter(t=>t.scope==='week'&&t.date<wk&&!t.done):[];
+  return `<div class="card"><h2>Daily to-do${todoDay===TODAY?'<span class="tag">today</span>':''}</h2>
+  <div class="row"><div><label for="tdd">Date</label><input id="tdd" type="date" value="${todoDay}" onchange="setTodoDay(this.value)"></div></div>
+  <div class="mini"><input id="td" placeholder="Add a task for this day" aria-label="New daily task" onkeydown="if(event.key==='Enter')addTodo('day')"><button onclick="addTodo('day')">Add</button></div>
+  ${pr(D)}${rows(D)}</div>
+  ${overD.length?`<div class="card"><h2>Unfinished from earlier days</h2>${rows(overD,true)}</div>`:''}
+  <div class="card"><h2>Weekly to-do</h2>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><button class="sm" onclick="shiftWk(-1)" aria-label="Previous week">‹ Prev</button><b style="text-align:center">${todoWk===wk?'This week · ':''}${nice(todoWk)} – ${nice(addDays(todoWk,6))}</b><button class="sm" onclick="shiftWk(1)" aria-label="Next week">Next ›</button></div>
+  <div class="mini"><input id="tw" placeholder="Add a task for this week" aria-label="New weekly task" onkeydown="if(event.key==='Enter')addTodo('week')"><button onclick="addTodo('week')">Add</button></div>
+  ${pr(W)}${rows(W)}</div>
+  ${overW.length?`<div class="card"><h2>Unfinished from earlier weeks</h2>${rows(overW,true)}</div>`:''}`}
+
+let calMonth=TODAY.slice(0,7),calSel=TODAY;
+const t12=t=>{const p=t.split(':').map(Number);return ((p[0]+11)%12+1)+':'+pad(p[1])+' '+(p[0]<12?'AM':'PM')};
+const evSort=a=>a.slice().sort((x,y)=>x.start.localeCompare(y.start)||x.id-y.id);
+const HH=48;
+let calMode='day',calScroll=5*HH,calStart='09:00';
+const toMin=t=>{const p=t.split(':').map(Number);return p[0]*60+p[1]};
+const h12=h=>(h%12||12)+(h<12?' AM':' PM');
+function calShift(n){const d=new Date(calMonth+'-01T00:00');d.setMonth(d.getMonth()+n);calMonth=ymd(d).slice(0,7);render()}
+function calPick(d){calSel=d;calMonth=d.slice(0,7);render()}
+function calOpen(d){calSel=d;calMonth=d.slice(0,7);calMode='day';render()}
+function calNav(n){if(calMode==='month')return calShift(n);calSel=addDays(calSel,(calMode==='week'?7:1)*n);calMonth=calSel.slice(0,7);render()}
+function calToday(){calSel=TODAY;calMonth=MONTH;render()}
+function calSetMode(m){calMode=m;render()}
+function calGrid(ev,d){const r=ev.currentTarget.getBoundingClientRect(),h=Math.min(23,Math.max(0,Math.floor((ev.clientY-r.top)/HH)));calSel=d;calMonth=d.slice(0,7);calStart=pad(h)+':00';render()}
+function evLayout(a){
+  const L=a.map(e=>{const s=toMin(e.start);let en=e.end?toMin(e.end):s+60;if(en<=s)en=s+60;return{e:e,s:s,en:Math.min(en,1440)}}).sort((x,y)=>x.s-y.s);
+  const out=[];let cl=[],end=0;
+  const flush=()=>{const cols=[];cl.forEach(it=>{let c=cols.findIndex(x=>x<=it.s);if(c<0){c=cols.length;cols.push(0)}cols[c]=it.en;it.c=c});cl.forEach(it=>{it.n=cols.length;out.push(it)});cl=[]};
+  L.forEach(it=>{if(cl.length&&it.s>=end)flush();cl.push(it);end=cl.length===1?it.en:Math.max(end,it.en)});
+  if(cl.length)flush();
+  return out}
+function routineBlocks(d){const g=new Date(d+'T00:00').getDay(),b=[{s:0,e:300,l:'Sleep',k:'z'},{s:1380,e:1440,l:'Sleep',k:'z'}];if(g>=1&&g<=5){b.push({s:330,e:405,l:'Gym',k:'g'},{s:1320,e:1380,l:'English',k:'e'})}return b}
+function dayCol(d){
+  const rt=routineBlocks(d).map(b=>`<div class="rb ${b.k}" style="top:${b.s/60*HH}px;height:${(b.e-b.s)/60*HH}px"><small>${b.l}</small></div>`).join('');
+  const evs=evLayout(S.events.filter(e=>e.date===d)).map(it=>`<div class="eb ${it.e.done?'dn':''}" style="top:${it.s/60*HH}px;height:${Math.max(22,(it.en-it.s)/60*HH-2)}px;left:calc(${it.c/it.n*100}% + 1px);width:calc(${100/it.n}% - 2px)" onclick="event.stopPropagation();calPick('${d}')"><b>${esc(it.e.title)}</b><small>${t12(it.e.start)}</small></div>`).join('');
+  const now=d===TODAY?`<div class="nowl" style="top:${(new Date().getHours()*60+new Date().getMinutes())/60*HH}px"></div>`:'';
+  return `<div class="dc" onclick="calGrid(event,'${d}')">${rt}${evs}${now}</div>`}
+
+function addEvent(){const t=val('et').trim();if(!t)return alert('Enter what you need to do.');const s=val('es');if(!s)return alert('Choose a start time.');S.events.push({id:Date.now(),date:calSel,title:t,start:s,end:val('ee'),done:false});persist();render()}
+function tEvent(id){const e=S.events.find(x=>x.id===id);e.done=!e.done;persist();render()}
+function delEvent(id){S.events=S.events.filter(x=>x.id!==id);persist();render()}
+function homeSched(){
+  const a=evSort(S.events.filter(e=>e.date===TODAY));
+  if(!a.length)return '<p class="empty">Nothing scheduled today. Add work in the Calendar tab.</p>';
+  return a.map(e=>`<div class="item"><span style="${e.done?'text-decoration:line-through;color:var(--mute)':''}"><b>${esc(e.title)}</b><small>${t12(e.start)}${e.end?' \u2013 '+t12(e.end):''}</small></span>${e.done?'<b style="color:var(--study)">\u2713</b>':''}</div>`).join('')}
+
+function calView(){
+  const sel=new Date(calSel+'T00:00'),dow=sel.getDay(),ws=addDays(calSel,-((dow+6)%7));
+  const evM=S.events.filter(e=>e.date.startsWith(calMonth));
+  let title,body;
+  if(calMode==='month'){
+    const first=new Date(calMonth+'-01T00:00'),lead=(first.getDay()+6)%7,nd=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
+    const cells=[];for(let i=0;i<lead;i++)cells.push(null);for(let d=1;d<=nd;d++)cells.push(calMonth+'-'+pad(d));
+    title=first.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    const grid=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(n=>`<div class="hd">${n}</div>`).join('')+cells.map(d=>{
+      if(!d)return '<div></div>';
+      const n=S.events.filter(e=>e.date===d).length;
+      return `<button class="cd ${d===TODAY?'today':''} ${d===calSel?'sel':''}" onclick="calPick('${d}')" aria-label="${nice(d)}, ${n} scheduled"><span>${+d.slice(8)}</span><span class="dots">${'<i></i>'.repeat(Math.min(n,3))}</span></button>`}).join('');
+    body=`<div class="cal">${grid}</div><p class="sub" style="margin:10px 0 0">${evM.length} scheduled this month · ${evM.filter(e=>e.done).length} done. Switch to Day or Week to see the time grid.</p>`;
+  }else{
+    const ds=calMode==='week'?[0,1,2,3,4,5,6].map(i=>addDays(ws,i)):[calSel];
+    title=calMode==='week'?nice(ds[0])+' – '+nice(ds[6]):sel.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
+    const head=ds.map(d=>`<button class="${d===TODAY?'today':''} ${d===calSel&&calMode==='week'?'sel':''}" onclick="calOpen('${d}')">${dayName(d)}<b>${+d.slice(8)}</b></button>`).join('');
+    const hrs=Array.from({length:23},(_,i)=>i+1).map(h=>`<span style="top:${h*HH}px">${h12(h)}</span>`).join('');
+    body=`<div class="tgh" style="--n:${ds.length}"><div></div>${head}</div><div class="tg" id="tg" onscroll="calScroll=this.scrollTop"><div class="tgi" style="--n:${ds.length}"><div class="hrs">${hrs}</div>${ds.map(dayCol).join('')}</div></div><p class="sub" style="margin:8px 0 0;font-size:.8rem">Tap an empty hour to set the start time, then add the work below. Shaded blocks are your routine (sleep, gym, English).</p>`;
+  }
+  const dayEv=evSort(S.events.filter(e=>e.date===calSel)),dayTd=S.todos.filter(t=>t.scope==='day'&&t.date===calSel);
+  const evRows=dayEv.map(e=>`<label class="chk"><input type="checkbox" ${e.done?'checked':''} onchange="tEvent(${e.id})"><span style="flex:1;${e.done?'text-decoration:line-through;color:var(--mute)':''}"><b>${esc(e.title)}</b><small style="display:block;color:var(--mute)">${t12(e.start)}${e.end?' – '+t12(e.end):''}</small></span><button type="button" class="x" aria-label="Delete" onclick="event.preventDefault();delEvent(${e.id})">×</button></label>`).join('');
+  const tdRows=dayTd.map(t=>`<label class="chk"><input type="checkbox" ${t.done?'checked':''} onchange="tTodo(${t.id})"><span style="flex:1;${t.done?'text-decoration:line-through;color:var(--mute)':''}">${esc(t.text)}</span></label>`).join('');
+  const modes=['day','week','month'].map(m=>`<button class="sm" style="${calMode===m?'background:var(--ink);color:var(--bg)':''}" onclick="calSetMode('${m}')">${m[0].toUpperCase()+m.slice(1)}</button>`).join('');
+  return `<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><button class="sm" onclick="calNav(-1)" aria-label="Previous">‹</button><h2 style="margin:0;text-align:center">${title}</h2><button class="sm" onclick="calNav(1)" aria-label="Next">›</button></div>
+  <div style="display:flex;gap:6px;margin-bottom:12px">${modes}<button class="sm" style="margin-left:auto" onclick="calToday()">Today</button></div>${body}</div>
+  <div class="card"><h2>${sel.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'})}${calSel===TODAY?'<span class="tag">today</span>':''}</h2>
+  <div class="row"><div style="grid-column:1/-1"><label for="et">Work to schedule</label><input id="et" placeholder="e.g. Finish assignment, dentist visit"></div></div>
+  <div class="row"><div><label for="es">Start time</label><input id="es" type="time" value="${calStart}"></div><div><label for="ee">End time – optional</label><input id="ee" type="time"></div></div>
+  <button class="go" style="background:var(--sleep)" onclick="addEvent()">Add to this day</button>
+  <h2 style="margin-top:14px">Scheduled</h2>${evRows||'<p class="empty">Nothing scheduled for this day.</p>'}
+  ${tdRows?'<h2 style="margin-top:14px">To-do for this day</h2>'+tdRows:''}</div>`}
+
+let planWk=wk;
+const MEALS=['Breakfast','Lunch','Dinner','Snack'];
+function planNav(n){planWk=addDays(planWk,7*n);render()}
+function pEntry(k){return S.plan[k]||(S.plan[k]={text:'',cost:0,fid:0})}
+function setPlanText(k,v){const p=pEntry(k);p.text=v.trim();if(p.fid){const f=S.food.find(e=>e.id===p.fid);if(f&&p.text)f.name=p.text}persist()}
+function setPlanCost(k,v){const p=pEntry(k);p.cost=Math.max(0,+v||0);if(p.fid){const f=S.food.find(e=>e.id===p.fid);if(f){f.amt=p.cost;f.free=!p.cost}}persist();render()}
+function setShop(v){S.shop[planWk]=v;persist()}
+function tPlan(k){
+  const p=S.plan[k];
+  if(!p||!p.text.trim()){alert('Write the meal first, then tick it when you have eaten it.');render();return}
+  const a=k.split('|');
+  if(p.fid){S.food=S.food.filter(e=>e.id!==p.fid);p.fid=0}
+  else{const id=Date.now();S.food.push({id:id,date:a[0],name:p.text.trim(),meal:a[1],amt:p.cost||0,free:!p.cost});p.fid=id}
+  persist();render()}
+function copyPlan(){
+  let c=0;
+  for(let i=0;i<7;i++){const d=addDays(planWk,i),o=addDays(planWk,i-7);MEALS.forEach(m=>{const src=S.plan[o+'|'+m],cur=S.plan[d+'|'+m];if(src&&src.text&&!(cur&&cur.text)){S.plan[d+'|'+m]={text:src.text,cost:src.cost||0,fid:0};c++}})}
+  if(!c)alert('Nothing to copy. Last week has no meals planned, or this week is already filled.');
+  persist();render()}
+function homeMeals(){
+  const r=MEALS.map(m=>{const p=S.plan[TODAY+'|'+m];return p&&p.text?`<div class="item"><span><b>${m}</b><small>${esc(p.text)}</small></span>${p.fid?'<b style="color:var(--study)">\u2713</b>':''}</div>`:''}).join('');
+  return r||'<p class="empty">No meals planned today. Plan them in the Meal plan tab.</p>'}
+
+function planView(){
+  const ds=[0,1,2,3,4,5,6].map(i=>addDays(planWk,i));
+  let n=0,cost=0,eaten=0,ecost=0;
+  ds.forEach(d=>MEALS.forEach(m=>{const p=S.plan[d+'|'+m];if(p&&p.text){n++;cost+=p.cost||0;if(p.fid){eaten++;ecost+=p.cost||0}}}));
+  const days=ds.map(d=>`<div class="card"><h2>${new Date(d+'T00:00').toLocaleDateString('en-US',{weekday:'long'})} \u00b7 ${nice(d)}${d===TODAY?'<span class="tag">today</span>':''}</h2>${MEALS.map(m=>{const k=d+'|'+m,p=S.plan[k]||{text:'',cost:0,fid:0};return `<div class="sl"><span class="sm2">${m}</span><div class="slr"><input type="checkbox" ${p.fid?'checked':''} onchange="tPlan('${k}')" aria-label="Ate ${m}"><input value="${esc(p.text)}" placeholder="Plan ${m.toLowerCase()}" onchange="setPlanText('${k}',this.value)" aria-label="${m} plan"><input type="number" min="0" value="${p.cost||''}" placeholder="Rs" onchange="setPlanCost('${k}',this.value)" aria-label="${m} cost"></div></div>`}).join('')}</div>`).join('');
+  return `<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><button class="sm" onclick="planNav(-1)" aria-label="Previous week">\u2039 Prev</button><b style="text-align:center">${planWk===wk?'This week \u00b7 ':''}${nice(planWk)} \u2013 ${nice(addDays(planWk,6))}</b><button class="sm" onclick="planNav(1)" aria-label="Next week">Next \u203a</button></div>
+  <div class="stats"><div class="stat"><b>${n}</b><span>meals planned</span></div><div class="stat"><b>${rs(cost)}</b><span>planned cost</span></div><div class="stat"><b style="color:var(--study)">${eaten}/${n}</b><span>eaten (${rs(ecost)})</span></div></div>
+  <p class="sub" style="margin:10px 0">Write each meal and an optional cost. Tick it when you eat it and it is added to your Food log and spending automatically.</p>
+  <button class="sm" onclick="copyPlan()">Copy last week\u2019s plan into empty slots</button></div>
+  <div class="card"><h2>Grocery list for this week</h2><textarea aria-label="Grocery list" placeholder="Rice, eggs, vegetables, fruit..." onchange="setShop(this.value)">${esc(S.shop[planWk]||'')}</textarea></div>
+  ${days}`}
+
+const REPEATS=[['none','One time'],['weekly','Every week'],['monthly','Every month'],['yearly','Every year']];
+function addMonths(s,n,day){const p=s.split('-').map(Number),t=new Date(p[0],p[1]-1+n,1),last=new Date(t.getFullYear(),t.getMonth()+1,0).getDate();return ymd(new Date(t.getFullYear(),t.getMonth(),Math.min(day,last)))}
+function nextDue(b){if(b.repeat==='weekly')return addDays(b.due,7);if(b.repeat==='monthly')return addMonths(b.due,1,b.day);if(b.repeat==='yearly')return addMonths(b.due,12,b.day);return b.due}
+const bDays=b=>Math.round((new Date(b.due+'T00:00')-new Date(TODAY+'T00:00'))/864e5);
+function bStatus(b){const d=bDays(b);if(d<0)return{t:'Overdue by '+(-d)+' day'+(d===-1?'':'s'),c:'var(--bad)',k:0};if(d===0)return{t:'Due today',c:'var(--bad)',k:1};if(d<=b.remind)return{t:'Due in '+d+' day'+(d===1?'':'s'),c:'var(--money)',k:2};return{t:'In '+d+' days',c:'var(--mute)',k:3}}
+function addBill(){
+  const n=val('bn').trim(),d=val('bdue');
+  if(!n)return alert('Enter the payment name.');if(!d)return alert('Choose the due date.');
+  S.bills.push({id:Date.now(),name:n,amt:Math.max(0,+val('ba')||0),due:d,day:+d.slice(8),repeat:val('br'),remind:Math.max(0,+val('bm')||0),log:document.getElementById('bl').checked,paid:false,hist:[]});persist();render()}
+function payBill(id){
+  const b=S.bills.find(x=>x.id===id),mid=Date.now(),lg=b.log&&b.amt>0;
+  b.hist.unshift({id:mid,date:TODAY,amt:b.amt,due:b.due,logged:lg});
+  if(lg)S.money.push({id:mid,date:TODAY,type:'spend',cat:'Bills',amt:b.amt});
+  if(b.repeat==='none')b.paid=true;else b.due=nextDue(b);
+  persist();render()}
+function undoPay(id){const b=S.bills.find(x=>x.id===id),h=b.hist.shift();if(!h)return;b.due=h.due;b.paid=false;S.money=S.money.filter(e=>e.id!==h.id);persist();render()}
+function delBill(id){if(armed!==id){armed=id;render();return}S.bills=S.bills.filter(b=>b.id!==id);armed=null;persist();render()}
+function billsAlert(){
+  const a=S.bills.filter(b=>!b.paid&&bStatus(b).k<=2).sort((x,y)=>x.due.localeCompare(y.due));
+  if(!a.length)return '';
+  return `<div class="card" style="border-color:var(--money)"><h2>Payment reminders</h2>${a.map(b=>{const st=bStatus(b);return `<div class="item"><span><b>${esc(b.name)}</b><small>${b.amt?rs(b.amt)+' \u00b7 ':''}due ${nice(b.due)}</small></span><b style="color:${st.c}">${st.t}</b></div>`}).join('')}<button class="sm" style="margin-top:10px" onclick="go('bills')">Open Payments</button></div>`}
+
+function billsView(){
+  const act=S.bills.filter(b=>!b.paid).sort((a,b)=>a.due.localeCompare(b.due)),done=S.bills.filter(b=>b.paid);
+  const sumA=a=>a.reduce((s,b)=>s+b.amt,0);
+  const od=act.filter(b=>bDays(b)<0),wkB=act.filter(b=>{const d=bDays(b);return d>=0&&d<=7}),mB=act.filter(b=>b.due.startsWith(MONTH));
+  const btns=b=>`<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">${b.paid?'':`<button class="sm" style="background:var(--study);color:#fff;border-color:var(--study)" onclick="payBill(${b.id})">Mark as paid \u2713</button>`}${b.hist.length?`<button class="sm" onclick="undoPay(${b.id})">Undo last payment</button>`:''}<button class="sm" style="color:var(--bad)" onclick="delBill(${b.id})">${armed===b.id?'Tap again to delete':'Delete'}</button></div>`;
+  const card=b=>{const st=bStatus(b),rp=REPEATS.find(r=>r[0]===b.repeat)[1],lp=b.hist[0];
+    return `<div class="card"><h2>${esc(b.name)}<span class="tag" style="color:${st.c};border-color:${st.c}">${st.t}</span></h2><div class="stats"><div class="stat"><b>${b.amt?rs(b.amt):'\u2013'}</b><span>amount</span></div><div class="stat"><b>${nice(b.due)}</b><span>${rp}</span></div></div>${lp?`<p class="sub" style="margin:8px 0 0">Last paid on ${nice(lp.date)}</p>`:''}${btns(b)}</div>`};
+  const pcard=b=>`<div class="card"><h2>${esc(b.name)}<span class="tag" style="color:var(--study);border-color:var(--study)">Paid</span></h2><p class="sub" style="margin:0">${b.amt?rs(b.amt)+' \u00b7 ':''}paid on ${b.hist[0]?nice(b.hist[0].date):'\u2013'}</p>${btns(b)}</div>`;
+  return `<div class="card"><h2>Overview</h2><div class="stats"><div class="stat"><b style="color:${od.length?'var(--bad)':'var(--ink)'}">${od.length}</b><span>overdue (${rs(sumA(od))})</span></div><div class="stat"><b>${wkB.length}</b><span>due in 7 days (${rs(sumA(wkB))})</span></div><div class="stat"><b>${rs(sumA(mB))}</b><span>unpaid this month</span></div></div></div>
+  <div class="card"><h2>Add a payment reminder</h2>
+  <div class="row"><div style="grid-column:1/-1"><label for="bn">Payment</label><input id="bn" placeholder="e.g. Phone bill, rent, course fee"></div></div>
+  <div class="row"><div><label for="ba">Amount (Rs) \u2013 optional</label><input id="ba" type="number" min="0" placeholder="0"></div><div><label for="bdue">Due date</label><input id="bdue" type="date" value="${TODAY}"></div></div>
+  <div class="row"><div><label for="br">Repeat</label><select id="br">${REPEATS.map(r=>`<option value="${r[0]}">${r[1]}</option>`).join('')}</select></div><div><label for="bm">Remind me (days before)</label><input id="bm" type="number" min="0" value="3"></div></div>
+  <label class="chk" style="border:0;padding:4px 0 12px;font-size:.9rem"><input id="bl" type="checkbox" checked> Record it in my Money tab (Bills) when I mark it paid</label>
+  <button class="go" style="background:var(--money);color:#1b1200" onclick="addBill()">Add reminder</button>
+  <p class="sub" style="margin:10px 0 0;font-size:.8rem">Reminders show on your Home tab and here as the date gets close. This page cannot send phone notifications, so open the app to check them.</p></div>
+  ${act.map(card).join('')||'<p class="empty">No payments to remember. Add your first one above.</p>'}
+  ${done.length?'<h2 style="margin:18px 0 10px">Paid (one-time)</h2>'+done.map(pcard).join(''):''}`}
+
+const wsOf=d=>addDays(d,-((new Date(d+'T00:00').getDay()+6)%7));
+function rangeM(a,e){
+  const inn=x=>x.date>=a&&x.date<=e,ink=k=>k>=a&&k<=e;
+  const sd=S.study.filter(inn),sl=S.sleep.filter(inn),sp=SP().filter(inn);
+  const tds=S.todos.filter(t=>t.scope==='day'?inn(t):(t.date>=a&&t.date<=e)),evs=S.events.filter(inn);
+  const gk=o=>Object.keys(o).filter(k=>ink(k)&&o[k]==='done').length;
+  return {st:sum(sd,()=>1),days:new Set(sd.map(x=>x.date)).size,nights:sl.length,sleepAvg:sl.length?sum(sl,()=>1)/sl.length:0,
+    spend:sum(sp,()=>1),save:sum(S.money,x=>inn(x)&&x.type==='save'),inc:sum(S.money,x=>inn(x)&&x.type==='income'),
+    fCount:S.food.filter(inn).length,fCost:sum(S.food,inn),cats:cats(sp),gym:gk(S.gym),eng:gk(S.eng),
+    skin:Object.keys(S.care).filter(k=>ink(k)&&ALL.every(id=>careDone(k,id))).length,
+    tdD:tds.filter(t=>t.done).length,tdN:tds.length,evD:evs.filter(x=>x.done).length,evN:evs.length,
+    dream:S.hunger.reduce((s,h)=>s+(h.saves||[]).filter(inn).reduce((q,x)=>q+x.amt,0),0),
+    ach:S.hunger.filter(h=>h.done&&h.doneDate>=a&&h.doneDate<=e).length,
+    paid:S.bills.reduce((s,b)=>s+b.hist.filter(inn).length,0)}}
+function monthExtra(m){
+  const r=rangeM(m+'-01',m+'-31');
+  return `<div class="stat"><b>${r.skin}</b><span>full skincare days</span></div>
+  <div class="stat"><b>${r.tdD}/${r.tdN}</b><span>to-do tasks done</span></div>
+  <div class="stat"><b>${r.evD}/${r.evN}</b><span>scheduled work done</span></div>
+  <div class="stat"><b>${r.paid}</b><span>payments made</span></div>`}
+function weeksView(){
+  const ds=[];
+  [S.study,S.sleep,S.money,S.food,S.events,S.todos].forEach(a=>a.forEach(x=>ds.push(x.date)));
+  Object.keys(S.gym).concat(Object.keys(S.eng),Object.keys(S.care)).forEach(k=>ds.push(k));
+  const set=new Set([wk]);ds.forEach(d=>{if(d&&/^\d{4}-\d{2}-\d{2}$/.test(d))set.add(wsOf(d))});
+  const L=[...set].sort().reverse().slice(0,26);
+  const k=m=>m>=1000?(m/1000).toFixed(1)+'k':Math.round(m);
+  const dl=(a,b,f)=>{const d=a-b;return d===0?'same as last week':(d>0?'\u25b2 ':'\u25bc ')+f(Math.abs(d))+' vs last week'};
+  const R=[7,6,5,4,3,2,1,0].map(i=>{const w=addDays(wk,-7*i);return Object.assign({w:w},rangeM(w,addDays(w,6)))});
+  const lb=R.map(x=>nice(x.w));
+  const cards=L.map(w=>{
+    const x=rangeM(w,addDays(w,6)),p=rangeM(addDays(w,-7),addDays(w,-1));
+    return `<div class="card"><h2>${nice(w)} \u2013 ${nice(addDays(w,6))}${w===wk?'<span class="tag">this week</span>':''}</h2><div class="stats">
+  <div class="stat"><b style="color:var(--study)">${fh(x.st)}</b><span>studied over ${x.days} day${x.days===1?'':'s'}<br>${dl(x.st,p.st,fh)}</span></div>
+  <div class="stat"><b style="color:var(--sleep)">${x.nights?fh(x.sleepAvg):'\u2013'}</b><span>avg sleep, ${x.nights} night${x.nights===1?'':'s'} logged</span></div>
+  <div class="stat"><b>${rs(x.spend)}</b><span>spent<br>${dl(x.spend,p.spend,rs)}</span></div>
+  <div class="stat"><b style="color:var(--money)">${rs(x.save)}</b><span>saved</span></div>
+  <div class="stat"><b>${rs(x.inc)}</b><span>income</span></div>
+  <div class="stat"><b style="color:${x.inc-x.spend-x.save<0?'var(--bad)':'var(--ink)'}">${rs(x.inc-x.spend-x.save)}</b><span>left (income \u2212 spent \u2212 saved)</span></div>
+  <div class="stat"><b>${x.fCount}</b><span>food items (${rs(x.fCost)})</span></div>
+  <div class="stat"><b>${x.gym}/5</b><span>gym sessions</span></div>
+  <div class="stat"><b>${x.eng}/5</b><span>English sessions</span></div>
+  <div class="stat"><b>${x.skin}/7</b><span>full skincare days</span></div>
+  <div class="stat"><b>${x.tdD}/${x.tdN}</b><span>to-do tasks done</span></div>
+  <div class="stat"><b>${x.evD}/${x.evN}</b><span>scheduled work done</span></div>
+  <div class="stat"><b>${rs(x.dream)}</b><span>saved for my list</span></div>
+  <div class="stat"><b>${x.ach}</b><span>hunger goals achieved</span></div>
+  <div class="stat"><b>${x.paid}</b><span>payments made</span></div>
+  <div style="grid-column:1/-1"><label>Spending by category</label>${catBars(x.cats)}</div></div></div>`}).join('');
+  return `<div class="card"><h2>Study hours by week</h2>${bars(R.map(x=>x.st),lb,0,'var(--study)',m=>Math.round(m/60)+'h')}</div>
+  <div class="card"><h2>Spent by week</h2>${bars(R.map(x=>x.spend),lb,0,'var(--bad)',k)}</div>
+  <div class="card"><h2>Saved by week</h2>${bars(R.map(x=>x.save),lb,0,'var(--money)',k)}</div>
+  <div class="card"><h2>Gym and English sessions by week</h2>${bars(R.map(x=>x.gym+x.eng),lb,10,'var(--sleep)',m=>m+'/10')}</div>${cards}`}
+
+const CB=[
+ {k:'st',l:'Study',c:'var(--study)',v:x=>x.st/60,f:v=>v.toFixed(1)+'h'},
+ {k:'sl',l:'Sleep (avg per night)',c:'var(--sleep)',v:x=>x.sleepAvg/60,f:v=>v?v.toFixed(1)+'h':'\u2013'},
+ {k:'sp',l:'Spent',c:'var(--bad)',v:x=>x.spend,f:rs},
+ {k:'sv',l:'Saved',c:'var(--money)',v:x=>x.save,f:rs},
+ {k:'gy',l:'Gym',c:'#2f9e63',v:x=>x.gym,f:v=>v+' sessions'},
+ {k:'en',l:'English',c:'#c05fd0',v:x=>x.eng,f:v=>v+' sessions'},
+ {k:'td',l:'Tasks done',c:'#9a8f2f',v:x=>x.tdD,f:v=>v+' tasks'},
+ {k:'sk',l:'Skincare days',c:'#e0709a',v:x=>x.skin,f:v=>v+' days'}];
+let cbOff={},cbSel={week:-1,month:-1};
+function cbToggle(k){cbOff[k]=!cbOff[k];render()}
+function cbPick(m,i){cbSel[m]=i;render()}
+function comboCard(mode){
+  const P=[];
+  if(mode==='week'){for(let i=7;i>=0;i--){const a=addDays(wk,-7*i);P.push({a:a,e:addDays(a,6),l:nice(a),t:nice(a)+' \u2013 '+nice(addDays(a,6))})}}
+  else{for(let i=5;i>=0;i--){const a=addMonths(MONTH+'-01',-i,1),d=new Date(a+'T00:00');P.push({a:a,e:a.slice(0,8)+'31',l:d.toLocaleDateString('en-US',{month:'short'}),t:d.toLocaleDateString('en-US',{month:'long',year:'numeric'})})}}
+  const n=P.length,R=P.map(p=>rangeM(p.a,p.e));
+  const si=(cbSel[mode]<0||cbSel[mode]>=n)?n-1:cbSel[mode];
+  const W=560,H=250,L0=36,R0=8,T=12,B=28,pw=W-L0-R0,ph=H-T-B;
+  const X=i=>L0+pw*(i+.5)/n,Y=v=>T+ph*(1-v/100);
+  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="All progress together, by ${mode}">`;
+  [0,25,50,75,100].forEach(g=>{svg+=`<line x1="${L0}" x2="${W-R0}" y1="${Y(g)}" y2="${Y(g)}" style="stroke:var(--line)"/><text x="${L0-6}" y="${Y(g)+4}" text-anchor="end" font-size="10" style="fill:var(--mute)">${g}%</text>`});
+  svg+=`<rect x="${L0+pw*si/n}" y="${T}" width="${pw/n}" height="${ph}" style="fill:var(--ink);opacity:.08"/>`;
+  P.forEach((p,i)=>{svg+=`<text x="${X(i)}" y="${H-8}" text-anchor="middle" font-size="10" style="fill:${i===si?'var(--ink)':'var(--mute)'}">${p.l}</text>`});
+  CB.filter(s=>!cbOff[s.k]).forEach(s=>{
+    const vs=R.map(s.v),mx=Math.max(...vs),pts=vs.map((v,i)=>[X(i),Y(mx?v/mx*100:0)]);
+    svg+=`<polyline fill="none" stroke-width="2.2" stroke-linejoin="round" style="stroke:${s.c}" points="${pts.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' ')}"/>`+pts.map(q=>`<circle cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="3" style="fill:${s.c}"/>`).join('')});
+  P.forEach((p,i)=>{svg+=`<rect x="${L0+pw*i/n}" y="${T}" width="${pw/n}" height="${ph+B}" fill="transparent" style="cursor:pointer" onclick="cbPick('${mode}',${i})"><title>${p.t}</title></rect>`});
+  svg+='</svg>';
+  const cur=R[si],prev=si>0?R[si-1]:null;
+  const rows=CB.map(s=>{
+    const v=s.v(cur),pv=prev?s.v(prev):null;let d='';
+    if(pv!==null){if(pv>0){const ch=Math.round((v-pv)/pv*100);d=ch===0?'same':(ch>0?'\u25b2 ':'\u25bc ')+Math.abs(ch)+'%'}else if(v>0)d='new'}
+    return `<div class="item" style="${cbOff[s.k]?'opacity:.5':''}"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${s.c};margin-right:8px"></i>${s.l}</span><span><b>${s.f(v)}</b> <small style="display:inline;color:var(--mute)">${d}</small></span></div>`}).join('');
+  const chips=CB.map(s=>`<button class="chip ${cbOff[s.k]?'off':''}" onclick="cbToggle('${s.k}')"><i style="background:${s.c}"></i>${s.l}</button>`).join('');
+  return `<div class="card"><h2>${mode==='week'?'Week by week':'Month by month'}: everything together</h2><p class="sub" style="margin:0 0 10px;font-size:.85rem">Hours, rupees and sessions are different units, so each line is shown as a percentage of its own best ${mode}. Tap a ${mode} on the graph to see the real numbers. Tap a name below to hide or show its line.</p><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${chips}</div>${svg}<h2 style="margin:14px 0 4px">${P[si].t}${si===n-1?'<span class="tag">'+(mode==='week'?'this week':'this month')+'</span>':''}</h2>${rows}<p class="sub" style="margin:8px 0 0;font-size:.8rem">Change shows ${mode==='week'?'the week':'the month'} before.</p></div>`}
+
+function niceMax(v){if(!(v>0))return 4;const p=Math.pow(10,Math.floor(Math.log10(v))),n=v/p;return [1,1.2,1.6,2,2.4,3,4,5,6,8,10].find(x=>x>=n-1e-9)*p}
+const kfmt=m=>m>=1000?+(m/1000).toFixed(2)+'k':+m.toFixed(0);
+function pairChart(mode){
+  const P=[];
+  if(mode==='week'){for(let i=7;i>=0;i--){const a=addDays(wk,-7*i);P.push({a:a,e:addDays(a,6),l:nice(a),t:nice(a)+' \u2013 '+nice(addDays(a,6))})}}
+  else{for(let i=5;i>=0;i--){const a=addMonths(MONTH+'-01',-i,1),d=new Date(a+'T00:00');P.push({a:a,e:a.slice(0,8)+'31',l:d.toLocaleDateString('en-US',{month:'short'}),t:d.toLocaleDateString('en-US',{month:'long',year:'numeric'})})}}
+  const D=P.map(p=>{const r=rangeM(p.a,p.e);return{l:p.l,t:p.t,sp:r.spend,st:r.st/60}});
+  const W=640,H=300,L=54,R=46,T=30,B=40,pw=W-L-R,ph=H-T-B,n=D.length,gw=pw/n,bw=Math.min(28,gw*.36);
+  const mS=niceMax(Math.max(...D.map(x=>x.sp))),mH=niceMax(Math.max(...D.map(x=>x.st)));
+  const y=(v,m)=>T+ph-(v/m)*ph;
+  let g='';
+  for(let i=0;i<=4;i++){const yy=T+ph-ph*i/4;g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" style="stroke:var(--line)"/><text x="${L-6}" y="${yy+3}" text-anchor="end" class="ax">${kfmt(mS*i/4)}</text><text x="${W-R+6}" y="${yy+3}" class="ax">${+(mH*i/4).toFixed(1)}h</text>`}
+  D.forEach((d,i)=>{
+    const cx=L+gw*i+gw/2,y1=y(d.sp,mS),y2=y(d.st,mH);
+    g+=`<rect x="${cx-bw-1}" y="${y1}" width="${bw}" height="${T+ph-y1}" rx="3" style="fill:var(--bad)"><title>${d.t}: ${rs(d.sp)} spent</title></rect><rect x="${cx+1}" y="${y2}" width="${bw}" height="${T+ph-y2}" rx="3" style="fill:var(--study)"><title>${d.t}: ${fh(d.st*60)} studied</title></rect>`;
+    if(d.sp)g+=`<text x="${cx-bw/2-1}" y="${y1-4}" text-anchor="middle" class="vl">${kfmt(d.sp)}</text>`;
+    if(d.st)g+=`<text x="${cx+bw/2+1}" y="${y2-4}" text-anchor="middle" class="vl">${+d.st.toFixed(1)}</text>`;
+    g+=`<text x="${cx}" y="${H-B+16}" text-anchor="middle" class="xl">${d.l}</text>`});
+  const cur=D[n-1],prev=D[n-2],per=mode==='week'?'week':'month';
+  const dsp=cur.sp-prev.sp,dst=Math.round((cur.st-prev.st)*60);
+  return `<div class="card"><h2>${mode==='week'?'Week by week':'Month by month'}: spent and study hours</h2>
+  <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="Grouped bars of money spent and study hours by ${per}"><text x="${L}" y="16" class="ax" style="fill:var(--bad);font-weight:600">\u25a0 Spent (Rs)</text><text x="${W-R}" y="16" text-anchor="end" class="ax" style="fill:var(--study);font-weight:600">\u25a0 Study (hours)</text>${g}</svg>
+  <p class="sub" style="margin:8px 0 10px;font-size:.8rem">Left scale is money spent (food, bills and all other spending). Right scale is study hours.</p>
+  <div class="stats"><div class="stat"><b style="color:var(--bad)">${rs(cur.sp)}</b><span>spent this ${per}<br>${dsp===0?'same as last '+per:(dsp>0?'\u25b2 ':'\u25bc ')+rs(Math.abs(dsp))+' vs last '+per}</span></div><div class="stat"><b style="color:var(--study)">${fh(cur.st*60)}</b><span>studied this ${per}<br>${dst===0?'same as last '+per:(dst>0?'\u25b2 ':'\u25bc ')+fh(Math.abs(dst))+' vs last '+per}</span></div></div></div>`}
+
+let hBy='day',hOrd='new',hType='all',hLim=20;
+function setHist(k,v){if(k==='by')hBy=v;if(k==='ord')hOrd=v;if(k==='type')hType=v;hLim=20;render()}
+function moreHist(){hLim+=20;render()}
+const HC={study:'var(--study)',sleep:'var(--sleep)',money:'var(--money)',food:'var(--bad)',routine:'#2f9e63',work:'#9a8f2f'};
+function histItems(){
+  const a=[],ST={spend:'Spent',save:'Saved',income:'Income'};
+  S.study.forEach(e=>a.push({d:e.date,t:'study',id:e.id,k:'study',ti:e.subject,de:'Study',v:fh(e.min),st:e.min}));
+  S.sleep.forEach(e=>a.push({d:e.date,t:'sleep',id:e.id,k:'sleep',ti:'Sleep',de:e.bed+' to '+e.wake,v:fh(e.min)}));
+  S.money.forEach(e=>a.push({d:e.date,t:'money',id:e.id,k:'money',ti:e.cat,de:ST[e.type]||e.type,v:rs(e.amt),sp:e.type==='spend'?e.amt:0,sv:e.type==='save'?e.amt:0}));
+  S.food.forEach(e=>a.push({d:e.date,t:'food',id:e.id,k:'food',ti:e.name,de:e.meal,v:e.free?'No price':rs(e.amt),sp:e.amt||0}));
+  Object.keys(S.gym).forEach(d=>a.push({d:d,t:'routine',ti:'Gym',de:'5:30 to 6:45 AM',v:S.gym[d]==='done'?'Done \u2713':'Missed'}));
+  Object.keys(S.eng).forEach(d=>a.push({d:d,t:'routine',ti:'Spoken English',de:'10 to 11 PM',v:S.eng[d]==='done'?'Done \u2713':'Missed'}));
+  S.events.forEach(e=>a.push({d:e.date,t:'work',ti:e.title,de:t12(e.start),v:e.done?'Done \u2713':''}));
+  S.todos.filter(t=>t.scope==='day').forEach(t=>a.push({d:t.date,t:'work',ti:t.text,de:'To-do',v:t.done?'Done \u2713':''}));
+  return a.filter(x=>x.d&&/^\d{4}-\d{2}-\d{2}$/.test(x.d))}
+function histView(){
+  const all=histItems(),f=hType==='all'?all:all.filter(x=>x.t===hType);
+  const key=d=>hBy==='day'?d:hBy==='week'?wsOf(d):d.slice(0,7);
+  const G={};f.forEach(x=>{const k=key(x.d);(G[k]=G[k]||[]).push(x)});
+  const ks=Object.keys(G).sort();if(hOrd==='new')ks.reverse();
+  const shown=ks.slice(0,hLim);
+  const lab=k=>hBy==='day'?new Date(k+'T00:00').toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):hBy==='week'?nice(k)+' \u2013 '+nice(addDays(k,6)):new Date(k+'-01T00:00').toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const isNow=k=>hBy==='day'?k===TODAY:hBy==='week'?k===wk:k===MONTH;
+  const btn=(grp,k,v,l)=>{const on=grp===v;return `<button class="sm" style="${on?'background:var(--ink);color:var(--bg)':''}" onclick="setHist('${k}','${v}')">${l}</button>`};
+  const types=[['all','All'],['study','Study'],['sleep','Sleep'],['money','Money'],['food','Food'],['routine','Routine'],['work','Work']];
+  const groups=shown.map(k=>{
+    const arr=G[k].slice().sort((x,y)=>x.d.localeCompare(y.d)||(x.id||0)-(y.id||0));
+    if(hOrd==='new')arr.reverse();
+    const st=arr.reduce((s,x)=>s+(x.st||0),0),sp=arr.reduce((s,x)=>s+(x.sp||0),0),sv=arr.reduce((s,x)=>s+(x.sv||0),0);
+    const bits=[st?'Studied '+fh(st):'',sp?'Spent '+rs(sp):'',sv?'Saved '+rs(sv):''].filter(Boolean).join(' \u00b7 ');
+    const rows=arr.map(x=>`<div class="item"><div><span style="color:${HC[x.t]}">\u25cf</span> <b>${esc(x.ti)}</b><small>${hBy==='day'?'':nice(x.d)+' \u00b7 '}${esc(x.de)}</small></div><div style="display:flex;align-items:center;gap:2px;text-align:right"><span>${x.v}</span>${x.k?`<button class="x" aria-label="Delete entry" onclick="del('${x.k}',${x.id})">\u00d7</button>`:''}</div></div>`).join('');
+    return `<div class="card"><h2>${lab(k)}${isNow(k)?'<span class="tag">'+(hBy==='day'?'today':hBy==='week'?'this week':'this month')+'</span>':''}</h2>${bits?`<p class="sub" style="margin:0 0 6px">${bits}</p>`:''}${rows}</div>`}).join('');
+  return `<div class="card"><h2>History</h2>
+  <label>Group by</label><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${btn(hBy,'by','day','Days')}${btn(hBy,'by','week','Weeks')}${btn(hBy,'by','month','Months')}</div>
+  <label>Order</label><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${btn(hOrd,'ord','new','Newest first')}${btn(hOrd,'ord','old','Oldest first')}</div>
+  <label>Show</label><div style="display:flex;gap:6px;flex-wrap:wrap">${types.map(t=>btn(hType,'type',t[0],t[1])).join('')}</div>
+  <p class="sub" style="margin:12px 0 0;font-size:.85rem">${f.length} entr${f.length===1?'y':'ies'} in ${ks.length} ${hBy==='day'?'day':hBy}${ks.length===1?'':'s'}</p></div>
+  ${groups||'<p class="empty">No entries yet. Add some in the other tabs and they will appear here.</p>'}
+  ${ks.length>shown.length?`<button class="sm" style="width:100%;padding:12px" onclick="moreHist()">Show more (${ks.length-shown.length} left)</button>`:''}`}
+
+function monthsView(){
+  const set=new Set([MONTH]);
+  [...S.study,...S.sleep,...S.money].forEach(e=>set.add(e.date.slice(0,7)));
+  const L=[...set].sort().reverse();
+  const full=m=>new Date(m+'-01T00:00').toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const short=m=>new Date(m+'-01T00:00').toLocaleDateString('en-US',{month:'short'});
+  const D=L.map(m=>{
+    const p=e=>e.date.startsWith(m),sd=S.study.filter(p),sl=S.sleep.filter(p);
+    const st=sum(sd,()=>1),days=new Set(sd.map(e=>e.date)).size;
+    return {m,st,days,nights:sl.length,sleepAvg:sl.length?sum(sl,()=>1)/sl.length:0,
+      spend:sum(SP(),p),save:sum(S.money,e=>p(e)&&e.type==='save'),inc:sum(S.money,e=>p(e)&&e.type==='income'),fCount:S.food.filter(p).length,fCost:sum(S.food,p),cats:cats(SP().filter(p)),gym:Object.keys(S.gym).filter(k=>k.startsWith(m)&&S.gym[k]==='done').length,brow:S.brows.filter(p).length,eng:Object.keys(S.eng).filter(k=>k.startsWith(m)&&S.eng[k]==='done').length,dream:S.hunger.reduce((s,h)=>s+h.saves.filter(p).reduce((a,x)=>a+x.amt,0),0),ach:S.hunger.filter(h=>h.done&&h.doneDate.startsWith(m)).length};
+  });
+  const R=D.slice(0,6).reverse(),lb=R.map(x=>short(x.m));
+  const k=m=>m>=1000?(m/1000).toFixed(1)+'k':Math.round(m);
+  const cards=D.map(x=>`<div class="card"><h2>${full(x.m)}${x.m===MONTH?'<span class="tag">this month</span>':''}</h2><div class="stats">
+  <div class="stat"><b style="color:var(--study)">${fh(x.st)}</b><span>studied over ${x.days} day${x.days===1?'':'s'}${x.days?' (avg '+fh(x.st/x.days)+')':''}</span></div>
+  <div class="stat"><b style="color:var(--sleep)">${x.nights?fh(x.sleepAvg):'–'}</b><span>avg sleep, ${x.nights} night${x.nights===1?'':'s'} logged</span></div>
+  <div class="stat"><b>${rs(x.spend)}</b><span>spent</span></div>
+  <div class="stat"><b style="color:var(--money)">${rs(x.save)}</b><span>saved</span></div>
+  <div class="stat"><b>${rs(x.inc)}</b><span>income</span></div>
+  <div class="stat"><b>${x.fCount}</b><span>food items (${rs(x.fCost)})</span></div>
+  <div class="stat"><b>${x.gym}</b><span>gym sessions (${fh(x.gym*75)})</span></div>
+  <div class="stat"><b>${x.eng}</b><span>English sessions (${fh(x.eng*60)})</span></div>
+  <div class="stat"><b>${x.ach}</b><span>hunger list goals achieved</span></div>
+  <div class="stat"><b>${rs(x.dream)}</b><span>saved for my list</span></div>
+  <div class="stat"><b>${x.brow?'Yes':'No'}</b><span>eyebrows done</span></div>
+  ${monthExtra(x.m)}
+  <div style="grid-column:1/-1"><label>Spending by category</label>${catBars(x.cats)}</div>
+  <div class="stat"><b style="color:${x.inc-x.spend-x.save<0?'var(--bad)':'var(--ink)'}">${rs(x.inc-x.spend-x.save)}</b><span>left (income − spent − saved)</span></div></div></div>`).join('');
+  return `<div class="card"><h2>Study hours by month</h2>${bars(R.map(x=>x.st),lb,0,'var(--study)',m=>Math.round(m/60)+'h')}</div>
+  <div class="card"><h2>Spent by month</h2>${bars(R.map(x=>x.spend),lb,0,'var(--bad)',k)}</div>
+  <div class="card"><h2>Saved by month</h2>${bars(R.map(x=>x.save),lb,0,'var(--money)',k)}</div>${cards}`}
+
+const SECT=['study','sleep','money','food','care','brows','gym','eng','engNotes','hunger','goals','todos','events','plan','shop','bills'];
+function setSync(t){const e=document.getElementById('syncLine');if(e)e.textContent=t}
+function mergeSec(k,a,b){
+  if(Array.isArray(a)&&Array.isArray(b)){const ids=new Set(a.map(x=>x.id));return a.concat(b.filter(x=>!ids.has(x.id)))}
+  if(a&&b&&typeof a==='object'&&!Array.isArray(a)){const o=Object.assign({},b,a);if(k==='care')Object.keys(b).forEach(d=>{if(a[d]&&b[d])o[d]=[...new Set([...a[d],...b[d]])]});return o}
+  return a!==undefined?a:b}
+let pushing=false,again=false;
+async function pushSync(){
+  if(!SY||!SY.ready)return;
+  if(pushing){again=true;return}
+  pushing=true;
+  try{
+    for(const k of SECT){
+      const j=JSON.stringify(S[k]);
+      if(j===SY.sent[k])continue;
+      const t=Date.now();
+      await SY.col.doc(k).set({j:j,t:t});
+      SY.sent[k]=j;S._t[k]=t;
+    }
+    saveLocal();setSync('Synced ✓ across your devices');
+  }catch(e){setSync('Sync problem. Your data is saved on this device.')}
+  pushing=false;
+  if(again){again=false;pushSync()}
+}
+const SB_URL='https://jtxtybwhnmrldolzgstc.supabase.co',SB_KEY='sb_publishable_dt1LvASXan3MX4Wja2ymBA_cbk1Zg9k';
+let sb=null;
+try{sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}})}catch(e){}
+function authMsg(t,ok){const e=document.getElementById('authMsg');e.textContent=t||'';e.className=ok?'ok':''}
+function showAuth(){document.getElementById('auth').classList.add('on')}
+function hideAuth(){document.getElementById('auth').classList.remove('on')}
+function wipeLocal(){try{localStorage.removeItem(K)}catch(e){}location.reload()}
+async function doSignIn(){
+  if(!sb)return authMsg('Could not load the sign-in service.');
+  const email=document.getElementById('aEmail').value.trim(),password=document.getElementById('aPass').value;
+  if(!email||!password)return authMsg('Enter your email and password.');
+  authMsg('Signing in…',true);
+  try{const r=await sb.auth.signInWithPassword({email,password});
+    if(r.error)return authMsg(r.error.message);
+    authMsg('');hideAuth();afterLogin(r.data.session)}
+  catch(e){authMsg('No connection. Check your internet and try again.')}}
+async function doSignUp(){
+  if(!sb)return authMsg('Could not load the sign-in service.');
+  const email=document.getElementById('aEmail').value.trim(),password=document.getElementById('aPass').value;
+  if(!email||password.length<6)return authMsg('Enter an email and a password of at least 6 characters.');
+  authMsg('Creating account…',true);
+  try{const r=await sb.auth.signUp({email,password});
+    if(r.error)return authMsg(r.error.message);
+    if(r.data.session){authMsg('');hideAuth();afterLogin(r.data.session)}
+    else authMsg('Account created. Check your email to confirm it, then sign in.',true)}
+  catch(e){authMsg('No connection. Check your internet and try again.')}}
+function afterLogin(session){
+  const u=session.user;
+  if(S._uid&&S._uid!==u.id){wipeLocal();return}
+  S._uid=u.id;saveLocal();
+  document.getElementById('acctLine').innerHTML='Signed in as <b>'+esc(u.email||'')+'</b> <button class="lnk" onclick="signOutApp()">Sign out</button><button class="lnk" onclick="deleteAccount()">Delete account</button>';
+  startSync(u.id)}
+async function signOutApp(){
+  if(!confirm('Sign out? Data stored on this device will be cleared. It stays safe in your account.'))return;
+  try{await pushSync()}catch(e){}
+  try{await sb.auth.signOut()}catch(e){}
+  wipeLocal()}
+async function deleteAccount(){
+  if(!confirm('Delete your account and ALL your data everywhere? This cannot be undone.'))return;
+  if(!confirm('Are you sure? Everything will be permanently deleted.'))return;
+  try{const r=await sb.rpc('delete_my_account');if(r.error)return alert('Could not delete the account: '+r.error.message);
+    try{await sb.auth.signOut({scope:'local'})}catch(e){}
+    wipeLocal()}
+  catch(e){alert('No connection. Try again when you are online.')}}
+async function boot(){
+  if(!sb){showAuth();authMsg('Could not load the sign-in service.');return}
+  let session=null;
+  try{const r=await sb.auth.getSession();session=r.data.session}catch(e){}
+  sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_OUT'&&SY){SY=null;setSync('');showAuth()}});
+  if(session)afterLogin(session);else showAuth()}
+async function startSync(uid){
+  if(SY&&SY.uid===uid)return;
+  setSync('Syncing…');
+  let busy=false,again=false;
+  SY={uid:uid,sent:{},ready:false,col:{
+    doc:k=>({set:async o=>{const r=await sb.from('tracker_sections').upsert({user_id:uid,section:k,j:o.j,t:o.t},{onConflict:'user_id,section'});if(r.error)throw r.error}}),
+    onSnapshot:(cb,errCb)=>{
+      const run=async()=>{
+        if(busy){again=true;return}
+        busy=true;
+        try{const r=await sb.from('tracker_sections').select('section,j,t');if(r.error)throw r.error;
+          cb({docs:r.data.map(x=>({id:x.section,exists:true,data:()=>({j:x.j,t:Number(x.t)})}))})}
+        catch(e){errCb&&errCb(e)}
+        busy=false;if(again){again=false;run()}};
+      run();
+      try{sb.channel('ts-'+uid).on('postgres_changes',{event:'*',schema:'public',table:'tracker_sections',filter:'user_id=eq.'+uid},run).subscribe()}catch(e){}
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden)run()});
+      window.addEventListener('online',run);
+      setInterval(()=>{if(!document.hidden)run()},45000)}}};
+  try{
+    SY.col.onSnapshot(snap=>{
+      const remote={};
+      snap.docs.forEach(d=>{if(d.exists){const x=d.data();if(x&&typeof x.j==='string')remote[d.id]={j:x.j,t:x.t||0}}});
+      let changed=false;
+      if(!SY.ready){
+        SECT.forEach(k=>{
+          const r=remote[k];if(!r)return;
+          let rem;try{rem=JSON.parse(r.j)}catch(e){return}
+          if(!S._joined)S[k]=mergeSec(k,rem,S[k]);
+          else if(r.t>(S._t[k]||0))S[k]=rem;
+          SY.sent[k]=r.j;S._t[k]=r.t;
+        });
+        S._joined=true;SY.ready=true;changed=true;
+      }else{
+        SECT.forEach(k=>{
+          const r=remote[k];if(!r)return;
+          if(r.j===JSON.stringify(S[k])){SY.sent[k]=r.j;return}
+          if(r.t>(S._t[k]||0)){try{S[k]=JSON.parse(r.j);SY.sent[k]=r.j;S._t[k]=r.t;changed=true}catch(e){}}
+        });
+      }
+      if(changed){normH();saveLocal();render()}
+      pushSync();
+    },()=>{if(SY)SY.ready=false;setSync('Sync unavailable right now. Your data is saved on this device.')});
+  }catch(e){setSync('Sync unavailable right now. Your data is saved on this device.')}
+}
+
+async function dl(name,data){
+  try{
+    const C=window.Capacitor;
+    if(C&&C.isNativePlatform&&C.isNativePlatform()){
+      const P=C.Plugins,w=await P.Filesystem.writeFile({path:name,data:data,directory:'CACHE',encoding:'utf8'});
+      await P.Share.share({title:name,url:w.uri,dialogTitle:'Save or send your file'});return}
+    const bl=new Blob([data],{type:'text/plain'}),a=document.createElement('a');
+    a.href=URL.createObjectURL(bl);a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000)
+  }catch(e){if(!/cancel|dismiss/i.test(String((e&&e.message)||e)))alert('Could not save the file.')}}
+function exportJSON(){const o={app:'daily-tracker',saved:new Date().toISOString()};SECT.forEach(k=>o[k]=S[k]);dl('daily-tracker-backup-'+TODAY+'.json',JSON.stringify(o,null,1))}
+function exportCSV(){
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const R=[['Date','Section','Item','Detail','Amount (Rs)','Minutes']];
+  S.study.forEach(e=>R.push([e.date,'Study',e.subject,'','',e.min]));
+  S.sleep.forEach(e=>R.push([e.date,'Sleep',e.bed+' to '+e.wake,'','',e.min]));
+  S.money.forEach(e=>R.push([e.date,'Money',e.type,e.cat,e.amt,'']));
+  S.food.forEach(e=>R.push([e.date,'Food',e.name,e.meal+(e.free?' (no price)':''),e.amt,'']));
+  Object.keys(S.care).forEach(d=>R.push([d,'Care',S.care[d].join(' '),'','','']));
+  S.brows.forEach(e=>R.push([e.date,'Eyebrows','done','','','']));
+  Object.keys(S.gym).forEach(d=>R.push([d,'Gym',S.gym[d],'','',S.gym[d]==='done'?75:'']));
+  Object.keys(S.eng).forEach(d=>R.push([d,'English',S.eng[d],'','',S.eng[d]==='done'?60:'']));
+  S.engNotes.forEach(e=>R.push([e.date,'English note',e.note,'','','']));
+  S.hunger.forEach(h=>{R.push([h.doneDate||'','Hunger list',h.title,(h.kind||'')+(h.done?' (fulfilled)':''),h.target,'']);h.saves.forEach(x=>R.push([x.date,'Hunger savings',h.title,'',x.amt,'']))});
+  dl('daily-tracker-'+TODAY+'.csv','\ufeff'+R.map(r=>r.map(q).join(',')).join('\n'))}
+function importText(txt){
+  try{const o=JSON.parse(String(txt).trim());if(!o||typeof o!=='object'||!SECT.some(k=>o[k]!==undefined))throw 0;
+    SECT.forEach(k=>{if(o[k]!==undefined)S[k]=mergeSec(k,S[k],o[k])});normH();persist();render();alert('Your entries were added.')}catch(e){alert('That does not look like tracker data. Please copy it again.')}}
+function importPaste(){importText(val('rp'))}
+function importBackup(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>importText(r.result);
+  r.readAsText(f)}
+function backupCard(){return `<div class="card"><h2>Backup and export</h2><p class="sub" style="margin-bottom:12px">Save a copy of all your data to your device.</p><div class="mini" style="flex-wrap:wrap"><button style="padding:12px 14px" onclick="exportJSON()">Download backup</button><button style="padding:12px 14px" onclick="exportCSV()">Export to spreadsheet</button></div><label for="rf" style="margin-top:10px">Restore from a backup file</label><input id="rf" type="file" accept=".json,application/json" onchange="importBackup(this)"><label for="rp" style="margin-top:12px">Or paste entries copied from your old downloaded file</label><textarea id="rp" rows="3" placeholder="Paste here" style="width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)"></textarea><button class="go" style="background:var(--ink);color:var(--bg);margin-top:8px" onclick="importPaste()">Import pasted entries</button></div>`}
+
+function render(){
+  nav();
+  const f={home:homeView,study:studyView,sleep:sleepView,money:moneyView,food:foodView,care:careView,gym:gymView,english:engView,hunger:hungerView,todo:todoView,calendar:calView,plan:planView,bills:billsView,weeks:weeksView,history:histView,months:monthsView}[tab]||homeView;
+  document.getElementById('view').innerHTML=f();
+  const on=document.querySelector('nav .on'),nv=document.getElementById('nav');
+  if(on)nv.scrollLeft=on.offsetLeft-nv.clientWidth/2+on.offsetWidth/2;
+  const tg=document.getElementById('tg');if(tg)tg.scrollTop=calScroll;
+}
+const h=location.hash.slice(1);if(['home','study','sleep','money','food','care','gym','english','hunger','todo','calendar','plan','bills','weeks','history','months'].includes(h))tab=h;
+render();
+boot();
+</script>
+</body>
+</html>
