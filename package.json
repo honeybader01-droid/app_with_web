@@ -1,0 +1,13 @@
+{
+  "name": "my-daily-tracker",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Daily tracker for study, sleep and money",
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/filesystem": "^6.0.1",
+    "@capacitor/share": "^6.0.2"
+  }
+}
